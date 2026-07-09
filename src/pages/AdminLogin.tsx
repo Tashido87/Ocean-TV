@@ -11,7 +11,7 @@ export default function AdminLogin() {
   const navigate = useNavigate();
 
   // Retrieve client ID from Vite environment
-  const googleClientId = (import.meta as any).env?.VITE_GOOGLE_CLIENT_ID || '';
+  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
 
   useEffect(() => {
     window.scrollTo(0, 0);
