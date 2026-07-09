@@ -21,8 +21,8 @@ const SEED_MOVIES: Movie[] = [
     runtime: 166,
     featured: true,
     heroBanner: true,
-    posterPath: 'https://image.tmdb.org/t/p/w500/czemb4hm1Yg7ZVhNXv357v9Zv83.jpg',
-    backdropPath: 'https://image.tmdb.org/t/p/original/xOM0j68Zm6gCHv6gS99f984H1T.jpg',
+    posterPath: 'https://image.tmdb.org/t/p/w500/heM4XKC0jA8fTSNe8F7oUkcJV7Z.jpg',
+    backdropPath: 'https://image.tmdb.org/t/p/original/eZ239CUp1d6OryZEBPnO2n87gMG.jpg',
     rating: 8.4,
     director: 'Denis Villeneuve',
     writer: 'Denis Villeneuve, Jon Spaihts',
@@ -51,8 +51,8 @@ const SEED_MOVIES: Movie[] = [
     runtime: 169,
     featured: true,
     heroBanner: true,
-    posterPath: 'https://image.tmdb.org/t/p/w500/gEU2Qv6vE6ihvAsjg3v4686gE.jpg',
-    backdropPath: 'https://image.tmdb.org/t/p/original/rAiw6gS6Yg9A36gBv6YgE4m6Y.jpg',
+    posterPath: 'https://image.tmdb.org/t/p/w500/yQvGrMoipbRoddT0ZR8tPoR7NfX.jpg',
+    backdropPath: 'https://image.tmdb.org/t/p/original/2ssWTSVklAEc98frZUQhgtGHx7s.jpg',
     rating: 8.6,
     director: 'Christopher Nolan',
     writer: 'Jonathan Nolan, Christopher Nolan',
@@ -80,8 +80,8 @@ const SEED_MOVIES: Movie[] = [
     runtime: 180,
     featured: true,
     heroBanner: false,
-    posterPath: 'https://image.tmdb.org/t/p/w500/8Gxv8gS6Yg9A36gBv6YgE4m6Y.jpg',
-    backdropPath: 'https://image.tmdb.org/t/p/original/fm6gS6Yg9A36gBv6YgE4m6Y.jpg',
+    posterPath: 'https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg',
+    backdropPath: 'https://image.tmdb.org/t/p/original/neeNHeXjMF5fXoCJRsOmkNGC7q.jpg',
     rating: 8.1,
     director: 'Christopher Nolan',
     writer: 'Christopher Nolan, Kai Bird',
@@ -109,8 +109,8 @@ const SEED_MOVIES: Movie[] = [
     runtime: 140,
     featured: false,
     heroBanner: false,
-    posterPath: 'https://image.tmdb.org/t/p/w500/8Vtbi7Su1Y71g6RM6v67v9Zv83.jpg',
-    backdropPath: 'https://image.tmdb.org/t/p/original/gN72YgTIsMyZ1mshX6Tq1YcT2gI.jpg',
+    posterPath: 'https://image.tmdb.org/t/p/w500/8Vt6mWEReuy4Of61Lnj5Xj704m8.jpg',
+    backdropPath: 'https://image.tmdb.org/t/p/original/9xfDWXAUbFXQK585JvByT5pEAhe.jpg',
     rating: 8.4,
     director: 'Joaquim Dos Santos, Kemp Powers, Justin K. Thompson',
     writer: 'Phil Lord, Christopher Miller, Dave Callaham',
@@ -137,8 +137,8 @@ const SEED_MOVIES: Movie[] = [
     runtime: 176,
     featured: false,
     heroBanner: false,
-    posterPath: 'https://image.tmdb.org/t/p/w500/74xTEgt7R368vU96vE4m6Y.jpg',
-    backdropPath: 'https://image.tmdb.org/t/p/original/7gYg7isIsfGdXALvImK8R0NfK2.jpg',
+    posterPath: 'https://image.tmdb.org/t/p/w500/74xTEgt7R36Fpooo50r9T25onhq.jpg',
+    backdropPath: 'https://image.tmdb.org/t/p/original/IYUD7rAIXzBM91TT3Z5fILUS7n.jpg',
     rating: 7.7,
     director: 'Matt Reeves',
     writer: 'Matt Reeves, Peter Craig',
@@ -164,8 +164,8 @@ const SEED_SERIES: Series[] = [
     subtitleType: 'Both',
     releaseYear: '2022',
     genres: ['Sci-Fi', 'Mystery', 'Drama'],
-    posterPath: 'https://image.tmdb.org/t/p/w500/l3K1Gf9GIsMyZ1mshX6Tq1YcT2gI.jpg',
-    backdropPath: 'https://image.tmdb.org/t/p/original/i8M6gS6Yg9A36gBv6YgE4m6Y.jpg',
+    posterPath: 'https://image.tmdb.org/t/p/w500/pPHpeI2X1qEd1CS1SeyrdhZ4qnT.jpg',
+    backdropPath: 'https://image.tmdb.org/t/p/original/ixgFmf1X59PUZam2qbAfskx2gQr.jpg',
     status: 'Returning Series',
     network: 'Apple TV+',
     language: 'English',
@@ -192,8 +192,8 @@ const SEED_SERIES: Series[] = [
     subtitleType: 'Myanmar',
     releaseYear: '2023',
     genres: ['Drama', 'Action', 'Adventure', 'Sci-Fi'],
-    posterPath: 'https://image.tmdb.org/t/p/w500/uKV0gS6Yg9A36gBv6YgE4m6Y.jpg',
-    backdropPath: 'https://image.tmdb.org/t/p/original/7gYg7isIsfGdXALvImK8R0NfK2.jpg',
+    posterPath: 'https://image.tmdb.org/t/p/w500/dmo6TYuuJgaYinXBPjrgG9mB5od.jpg',
+    backdropPath: 'https://image.tmdb.org/t/p/original/acevLdSl5I2MK5RYAm7gwAndt1w.jpg',
     status: 'Returning Series',
     network: 'HBO',
     language: 'English',
@@ -231,14 +231,56 @@ const KEYS = {
   ADMIN_TOKEN: 'cineapple_admin_token',
 };
 
-// Initialize DB
+// Initialize DB with automatic schema and image repair migration
 const initDatabase = () => {
-  if (!localStorage.getItem(KEYS.MOVIES)) {
+  let existingMovies: Movie[] = [];
+  try {
+    existingMovies = JSON.parse(localStorage.getItem(KEYS.MOVIES) || '[]');
+  } catch {}
+
+  let existingSeries: Series[] = [];
+  try {
+    existingSeries = JSON.parse(localStorage.getItem(KEYS.SERIES) || '[]');
+  } catch {}
+
+  // If we already have movies in localStorage, migrate/patch their image paths if they match seed items but have hallucinated URLs
+  if (existingMovies.length > 0) {
+    let patched = false;
+    const updatedMovies = existingMovies.map((m: Movie) => {
+      const match = SEED_MOVIES.find((seed) => seed.tmdbId === m.tmdbId || seed.id === m.id);
+      if (match && (m.posterPath !== match.posterPath || m.backdropPath !== match.backdropPath)) {
+        m.posterPath = match.posterPath;
+        m.backdropPath = match.backdropPath;
+        patched = true;
+      }
+      return m;
+    });
+    if (patched) {
+      localStorage.setItem(KEYS.MOVIES, JSON.stringify(updatedMovies));
+    }
+  } else {
     localStorage.setItem(KEYS.MOVIES, JSON.stringify(SEED_MOVIES));
   }
-  if (!localStorage.getItem(KEYS.SERIES)) {
+
+  // Same for TV Series
+  if (existingSeries.length > 0) {
+    let patched = false;
+    const updatedSeries = existingSeries.map((s: Series) => {
+      const match = SEED_SERIES.find((seed) => seed.tmdbId === s.tmdbId || seed.id === s.id);
+      if (match && (s.posterPath !== match.posterPath || s.backdropPath !== match.backdropPath)) {
+        s.posterPath = match.posterPath;
+        s.backdropPath = match.backdropPath;
+        patched = true;
+      }
+      return s;
+    });
+    if (patched) {
+      localStorage.setItem(KEYS.SERIES, JSON.stringify(updatedSeries));
+    }
+  } else {
     localStorage.setItem(KEYS.SERIES, JSON.stringify(SEED_SERIES));
   }
+
   if (!localStorage.getItem(KEYS.SECTIONS)) {
     localStorage.setItem(KEYS.SECTIONS, JSON.stringify(SEED_SECTIONS));
   }
