@@ -16,6 +16,7 @@ import Search from './pages/Search';
 import Favorites from './pages/Favorites';
 import Admin from './pages/Admin';
 import AdminLogin from './pages/AdminLogin';
+import GoogleCallback from './pages/GoogleCallback';
 import { AlertTriangle } from 'lucide-react';
 
 function NotFoundPage() {
@@ -58,6 +59,7 @@ export default function App() {
             <Route path="/favorites" element={<Favorites />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/admin-login" element={<AdminLogin />} />
+            <Route path="/auth/google/callback" element={<GoogleCallback />} />
             
             {/* Fallbacks */}
             <Route path="/404" element={<NotFoundPage />} />

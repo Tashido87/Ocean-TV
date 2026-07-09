@@ -32,10 +32,10 @@ const SEED_MOVIES: Movie[] = [
     country: 'United States',
     addedAt: '2026-07-01T12:00:00.000Z',
     cast: [
-      { id: '1190643', name: 'Timothée Chalamet', character: 'Paul Atreides', profilePath: 'https://image.tmdb.org/t/p/w500/c9X0ZALvImK8R0NfK2g87isIsfG.jpg' },
-      { id: '505710', name: 'Zendaya', character: 'Chani', profilePath: 'https://image.tmdb.org/t/p/w500/6t29Tshn6F6vMhX1S3E6gGMyS0G.jpg' },
-      { id: '1593821', name: 'Rebecca Ferguson', character: 'Lady Jessica', profilePath: 'https://image.tmdb.org/t/p/w500/6v7bYgTIsMyZ1mshX6Tq1YcT2gI.jpg' },
-      { id: '224192', name: 'Austin Butler', character: 'Feyd-Rautha Harkonnen', profilePath: 'https://image.tmdb.org/t/p/w500/8gYg7isIsfGdXALvImK8R0NfK2.jpg' }
+      { id: '1190668', name: 'Timothée Chalamet', character: 'Paul Atreides', profilePath: 'https://image.tmdb.org/t/p/w500/dFxpwRpmzpVfP1zjluH68DeQhyj.jpg' },
+      { id: '505710', name: 'Zendaya', character: 'Chani', profilePath: 'https://image.tmdb.org/t/p/w500/yCpzzMJ9gS7Rp7xgrVOsntW1m7D.jpg' },
+      { id: '933238', name: 'Rebecca Ferguson', character: 'Lady Jessica', profilePath: 'https://image.tmdb.org/t/p/w500/lJloTOheuQSirSLXNA3JHsrMNfH.jpg' },
+      { id: '86654', name: 'Austin Butler', character: 'Feyd-Rautha Harkonnen', profilePath: 'https://image.tmdb.org/t/p/w500/atdAs4pFGjUQ4m2W8kJYly7N6cC.jpg' }
     ]
   },
   {
@@ -62,9 +62,9 @@ const SEED_MOVIES: Movie[] = [
     country: 'United States',
     addedAt: '2026-07-02T12:00:00.000Z',
     cast: [
-      { id: '10297', name: 'Matthew McConaughey', character: 'Cooper', profilePath: 'https://image.tmdb.org/t/p/w500/e9ZALvImK8R0NfK2g87isIsfG.jpg' },
-      { id: '1813', name: 'Anne Hathaway', character: 'Brand', profilePath: 'https://image.tmdb.org/t/p/w500/6v7bYgTIsMyZ1mshX6Tq1YcT2gI.jpg' },
-      { id: '3895', name: 'Jessica Chastain', character: 'Murph', profilePath: 'https://image.tmdb.org/t/p/w500/c9X0ZALvImK8R0NfK2g87isIsfG.jpg' }
+      { id: '10297', name: 'Matthew McConaughey', character: 'Cooper', profilePath: 'https://image.tmdb.org/t/p/w500/lCySuYjhXix3FzQdS4oceDDrXKI.jpg' },
+      { id: '1813', name: 'Anne Hathaway', character: 'Brand', profilePath: 'https://image.tmdb.org/t/p/w500/nbccV2pMoyLTCeg5DQip24Eq0Jp.jpg' },
+      { id: '83002', name: 'Jessica Chastain', character: 'Murph', profilePath: 'https://image.tmdb.org/t/p/w500/eQKnihReJeB9vQEa5gySzAlKfZt.jpg' }
     ]
   },
   {
@@ -91,9 +91,9 @@ const SEED_MOVIES: Movie[] = [
     country: 'United States',
     addedAt: '2026-07-03T12:00:00.000Z',
     cast: [
-      { id: '2037', name: 'Cillian Murphy', character: 'J. Robert Oppenheimer', profilePath: 'https://image.tmdb.org/t/p/w500/8gYg7isIsfGdXALvImK8R0NfK2.jpg' },
-      { id: '5081', name: 'Emily Blunt', character: 'Kitty Oppenheimer', profilePath: 'https://image.tmdb.org/t/p/w500/6v7bYgTIsMyZ1mshX6Tq1YcT2gI.jpg' },
-      { id: '1892', name: 'Matt Damon', character: 'Leslie Groves', profilePath: 'https://image.tmdb.org/t/p/w500/e9ZALvImK8R0NfK2g87isIsfG.jpg' }
+      { id: '2037', name: 'Cillian Murphy', character: 'J. Robert Oppenheimer', profilePath: 'https://image.tmdb.org/t/p/w500/2lKs67r7FI4bPu0AXxMUJZxmUXn.jpg' },
+      { id: '5081', name: 'Emily Blunt', character: 'Kitty Oppenheimer', profilePath: 'https://image.tmdb.org/t/p/w500/5nCSG5TL1bP1geD8aaBfaLnLLCD.jpg' },
+      { id: '1892', name: 'Matt Damon', character: 'Leslie Groves', profilePath: 'https://image.tmdb.org/t/p/w500/aCvBXTAR9B1qRjIRzMBYhhbm1fR.jpg' }
     ]
   },
   {
@@ -120,8 +120,8 @@ const SEED_MOVIES: Movie[] = [
     country: 'United States',
     addedAt: '2026-07-04T12:00:00.000Z',
     cast: [
-      { id: '1472382', name: 'Shameik Moore', character: 'Miles Morales (voice)', profilePath: 'https://image.tmdb.org/t/p/w500/6t29Tshn6F6vMhX1S3E6gGMyS0G.jpg' },
-      { id: '122503', name: 'Hailee Steinfeld', character: 'Gwen Stacy (voice)', profilePath: 'https://image.tmdb.org/t/p/w500/6v7bYgTIsMyZ1mshX6Tq1YcT2gI.jpg' }
+      { id: '587506', name: 'Shameik Moore', character: 'Miles Morales (voice)', profilePath: 'https://image.tmdb.org/t/p/w500/ovUKfVOwJ7CadEHaG3NDsfA5xRq.jpg' },
+      { id: '130640', name: 'Hailee Steinfeld', character: 'Gwen Stacy (voice)', profilePath: 'https://image.tmdb.org/t/p/w500/4K2dzM3odGiVZOQOD6RjVxNq2ZQ.jpg' }
     ]
   },
   {
@@ -148,8 +148,8 @@ const SEED_MOVIES: Movie[] = [
     country: 'United States',
     addedAt: '2026-07-05T12:00:00.000Z',
     cast: [
-      { id: '11288', name: 'Robert Pattinson', character: 'Bruce Wayne / Batman', profilePath: 'https://image.tmdb.org/t/p/w500/e9ZALvImK8R0NfK2g87isIsfG.jpg' },
-      { id: '110811', name: 'Zoë Kravitz', character: 'Selina Kyle / Catwoman', profilePath: 'https://image.tmdb.org/t/p/w500/6v7bYgTIsMyZ1mshX6Tq1YcT2gI.jpg' }
+      { id: '11288', name: 'Robert Pattinson', character: 'Bruce Wayne / Batman', profilePath: 'https://image.tmdb.org/t/p/w500/3qZ09UE7lN6AtorfXFRYpEtSY93.jpg' },
+      { id: '110811', name: 'Zoë Kravitz', character: 'Selina Kyle / Catwoman', profilePath: 'https://image.tmdb.org/t/p/w500/n0mhAgmY6eJQmA7kaugsTZEJgHo.jpg' }
     ]
   }
 ];
@@ -248,10 +248,18 @@ const initDatabase = () => {
     let patched = false;
     const updatedMovies = existingMovies.map((m: Movie) => {
       const match = SEED_MOVIES.find((seed) => seed.tmdbId === m.tmdbId || seed.id === m.id);
-      if (match && (m.posterPath !== match.posterPath || m.backdropPath !== match.backdropPath)) {
-        m.posterPath = match.posterPath;
-        m.backdropPath = match.backdropPath;
-        patched = true;
+      if (match) {
+        let changed = false;
+        if (m.posterPath !== match.posterPath || m.backdropPath !== match.backdropPath) {
+          m.posterPath = match.posterPath;
+          m.backdropPath = match.backdropPath;
+          changed = true;
+        }
+        if (JSON.stringify(m.cast) !== JSON.stringify(match.cast)) {
+          m.cast = match.cast;
+          changed = true;
+        }
+        if (changed) patched = true;
       }
       return m;
     });

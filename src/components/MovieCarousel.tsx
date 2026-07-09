@@ -12,7 +12,7 @@ interface MovieCarouselProps {
   key?: string | number;
   title: string;
   items: (Movie | Series)[];
-  type: 'movie' | 'series';
+  type: 'movie' | 'series' | 'movies';
   badgeText?: string;
 }
 
@@ -20,6 +20,8 @@ export default function MovieCarousel({ title, items, type, badgeText }: MovieCa
   const containerRef = useRef<HTMLDivElement>(null);
   const [showLeft, setShowLeft] = useState(false);
   const [showRight, setShowRight] = useState(true);
+  
+  const normalizedType = type === 'movies' ? 'movie' : type;
 
   const checkScroll = () => {
     if (containerRef.current) {
@@ -103,7 +105,7 @@ export default function MovieCarousel({ title, items, type, badgeText }: MovieCa
         >
           {items.map((item, index) => (
             <div key={item.id || index} className="snap-start">
-              <MovieCard item={item} type={type} />
+              <MovieCard item={item} type={normalizedType} />
             </div>
           ))}
         </div>
