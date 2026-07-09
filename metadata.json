@@ -1,0 +1,6 @@
+{
+  "name": "Ocean TV",
+  "description": "A production-ready cinematic movie library web application for browsing movie collections, series, and actors with an immersive design theme.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
