@@ -11,7 +11,7 @@ export default function AdminLogin() {
   const navigate = useNavigate();
 
   // Retrieve client ID from Vite environment
-  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
+  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '21133276994-qb8d3c19sb3ha0sid0sjm5i7277a7vki.apps.googleusercontent.com';
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -25,7 +25,12 @@ export default function AdminLogin() {
     const handleOAuthMessage = (event: MessageEvent) => {
       // Validate origin
       const origin = event.origin;
-      if (!origin.endsWith('.run.app') && !origin.includes('localhost') && !origin.includes('127.0.0.1')) {
+      if (
+        origin !== window.location.origin &&
+        !origin.endsWith('.run.app') &&
+        !origin.includes('localhost') &&
+        !origin.includes('127.0.0.1')
+      ) {
         return;
       }
 
