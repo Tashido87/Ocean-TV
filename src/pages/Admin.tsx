@@ -40,6 +40,92 @@ export default function Admin() {
   });
   const [seriesSyncing, setSeriesSyncing] = useState(false);
   const [seriesStatusMsg, setSeriesStatusMsg] = useState('');
+  const [editorExpandedSeasonIdx, setEditorExpandedSeasonIdx] = useState<number | null>(null);
+
+  const handleAddSeasonToForm = () => {
+    const currentSeasons = seriesForm.seasons ? [...seriesForm.seasons] : [];
+    const nextNum = currentSeasons.length + 1;
+    const newSeason: Season = {
+      seasonNumber: nextNum,
+      name: `Season ${nextNum}`,
+      episodes: []
+    };
+    setSeriesForm(prev => ({
+      ...prev,
+      seasons: [...currentSeasons, newSeason]
+    }));
+    setEditorExpandedSeasonIdx(currentSeasons.length);
+  };
+
+  const handleUpdateSeasonInForm = (sIdx: number, updatedSeason: Partial<Season>) => {
+    if (!seriesForm.seasons) return;
+    const updatedSeasons = seriesForm.seasons.map((s, idx) => {
+      if (idx === sIdx) {
+        return { ...s, ...updatedSeason } as Season;
+      }
+      return s;
+    });
+    setSeriesForm(prev => ({
+      ...prev,
+      seasons: updatedSeasons
+    }));
+  };
+
+  const handleDeleteSeasonFromForm = (sIdx: number) => {
+    if (!seriesForm.seasons) return;
+    const updatedSeasons = seriesForm.seasons.filter((_, idx) => idx !== sIdx);
+    setSeriesForm(prev => ({
+      ...prev,
+      seasons: updatedSeasons
+    }));
+    if (editorExpandedSeasonIdx === sIdx) {
+      setEditorExpandedSeasonIdx(null);
+    } else if (editorExpandedSeasonIdx !== null && editorExpandedSeasonIdx > sIdx) {
+      setEditorExpandedSeasonIdx(editorExpandedSeasonIdx - 1);
+    }
+  };
+
+  const handleAddEpisodeToSeasonInForm = (sIdx: number) => {
+    if (!seriesForm.seasons) return;
+    const season = seriesForm.seasons[sIdx];
+    const currentEpisodes = season.episodes ? [...season.episodes] : [];
+    const nextNum = currentEpisodes.length + 1;
+    const newEpisode: Episode = {
+      episodeNumber: nextNum,
+      name: `Episode ${nextNum}`,
+      runtime: 45,
+      overview: ''
+    };
+    
+    handleUpdateSeasonInForm(sIdx, {
+      episodes: [...currentEpisodes, newEpisode]
+    });
+  };
+
+  const handleUpdateEpisodeInForm = (sIdx: number, epIdx: number, updatedEp: Partial<Episode>) => {
+    if (!seriesForm.seasons) return;
+    const season = seriesForm.seasons[sIdx];
+    if (!season.episodes) return;
+    const updatedEpisodes = season.episodes.map((ep, idx) => {
+      if (idx === epIdx) {
+        return { ...ep, ...updatedEp } as Episode;
+      }
+      return ep;
+    });
+    handleUpdateSeasonInForm(sIdx, {
+      episodes: updatedEpisodes
+    });
+  };
+
+  const handleDeleteEpisodeFromForm = (sIdx: number, epIdx: number) => {
+    if (!seriesForm.seasons) return;
+    const season = seriesForm.seasons[sIdx];
+    if (!season.episodes) return;
+    const updatedEpisodes = season.episodes.filter((_, idx) => idx !== epIdx);
+    handleUpdateSeasonInForm(sIdx, {
+      episodes: updatedEpisodes
+    });
+  };
 
   // --- STATE FOR HOMEPAGE MANAGEMENT ---
   const [sections, setSections] = useState<HomeSection[]>([]);
@@ -389,6 +475,7 @@ export default function Admin() {
       network: 'Apple TV+', language: 'English', rating: 7.5, seasons: []
     });
     setSeriesStatusMsg('');
+    setEditorExpandedSeasonIdx(null);
     loadDbData();
   };
 
@@ -1176,6 +1263,177 @@ export default function Admin() {
                       onChange={(e) => setSeriesForm(prev => ({ ...prev, genres: e.target.value.split(',').map(g => g.trim()) }))}
                       className="bg-apple-gray-800/60 text-white border border-white/5 rounded-lg px-3 py-2.5 text-xs font-semibold outline-none"
                     />
+                  </div>
+
+                  {/* SEASONS & EPISODES NESTED EDITOR */}
+                  <div className="flex flex-col gap-4 bg-black/30 p-5 rounded-2xl border border-white/5 mt-2">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      <div className="flex flex-col text-left">
+                        <span className="text-[10px] font-black text-cyan-400 tracking-wider uppercase">Seasons & Episodes Guide Editor</span>
+                        <span className="text-[11px] text-white/50 font-medium">Add seasons, update titles, or write episode synopses manually.</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleAddSeasonToForm}
+                        className="px-3 py-1.5 bg-cyan-950/40 hover:bg-cyan-900/40 border border-cyan-500/20 text-cyan-400 text-xs font-bold rounded-lg flex items-center gap-1.5 transition-all cursor-pointer self-start sm:self-center"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        Add Season
+                      </button>
+                    </div>
+
+                    {!seriesForm.seasons || seriesForm.seasons.length === 0 ? (
+                      <div className="text-center py-8 text-white/20 text-xs border border-dashed border-white/5 rounded-xl">
+                        No seasons recorded for this TV series yet. Click "Add Season" to begin.
+                      </div>
+                    ) : (
+                      <div className="flex flex-col gap-3">
+                        {seriesForm.seasons.map((season, sIdx) => {
+                          const isExpanded = editorExpandedSeasonIdx === sIdx;
+                          return (
+                            <div key={sIdx} className="bg-white/[0.02] border border-white/5 rounded-xl overflow-hidden transition-all duration-300">
+                              {/* Season Header Row */}
+                              <div className="flex items-center justify-between p-3 bg-white/[0.01] hover:bg-white/[0.03] transition-colors gap-3 flex-wrap sm:flex-nowrap">
+                                <div className="flex items-center gap-3 flex-1 min-w-0 flex-wrap sm:flex-nowrap">
+                                  {/* Toggle Expand */}
+                                  <button
+                                    type="button"
+                                    onClick={() => setEditorExpandedSeasonIdx(isExpanded ? null : sIdx)}
+                                    className="p-1 rounded bg-white/5 hover:bg-white/10 text-white/80 cursor-pointer flex-shrink-0"
+                                  >
+                                    {isExpanded ? (
+                                      <ChevronDown className="w-4 h-4" />
+                                    ) : (
+                                      <ChevronUp className="w-4 h-4" />
+                                    )}
+                                  </button>
+                                  
+                                  {/* Season Name Input */}
+                                  <input
+                                    type="text"
+                                    value={season.name}
+                                    onChange={(e) => handleUpdateSeasonInForm(sIdx, { name: e.target.value })}
+                                    placeholder="Season Name"
+                                    className="bg-apple-gray-800 text-white border border-white/10 rounded-lg px-2.5 py-1 text-xs font-bold w-full sm:w-44 focus:border-cyan-500/50 outline-none"
+                                  />
+
+                                  {/* Season Number Input */}
+                                  <div className="flex items-center gap-1.5 text-white/40 text-[10px] font-bold flex-shrink-0">
+                                    <span>No.</span>
+                                    <input
+                                      type="number"
+                                      value={season.seasonNumber}
+                                      onChange={(e) => handleUpdateSeasonInForm(sIdx, { seasonNumber: Number(e.target.value) })}
+                                      className="bg-apple-gray-800 text-white border border-white/10 rounded-lg px-2 py-1 text-xs font-bold w-12 text-center focus:border-cyan-500/50 outline-none"
+                                    />
+                                  </div>
+
+                                  <span className="text-[10px] font-black bg-cyan-950/40 text-cyan-400 px-2.5 py-0.5 rounded border border-cyan-500/10 flex-shrink-0">
+                                    {season.episodes?.length || 0} EPS
+                                  </span>
+                                </div>
+
+                                <div className="flex items-center gap-2 flex-shrink-0">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleAddEpisodeToSeasonInForm(sIdx)}
+                                    className="px-2.5 py-1.5 bg-white/5 hover:bg-white/10 text-white text-[10px] font-bold rounded-lg flex items-center gap-1 transition-colors cursor-pointer"
+                                  >
+                                    <Plus className="w-3 h-3" />
+                                    Add EP
+                                  </button>
+
+                                  <button
+                                    type="button"
+                                    onClick={() => handleDeleteSeasonFromForm(sIdx)}
+                                    className="p-1.5 rounded bg-red-600/10 hover:bg-red-600 border border-red-500/10 text-red-400 hover:text-white transition-colors cursor-pointer"
+                                    title="Delete Season"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
+                              </div>
+
+                              {/* Collapsible Episode list */}
+                              {isExpanded && (
+                                <div className="p-4 bg-black/40 border-t border-white/5 flex flex-col gap-3.5">
+                                  {!season.episodes || season.episodes.length === 0 ? (
+                                    <div className="text-center py-6 text-white/20 text-xs italic">
+                                      No episodes created in this season yet. Click "Add EP" above.
+                                    </div>
+                                  ) : (
+                                    <div className="flex flex-col gap-3">
+                                      {season.episodes.map((episode, epIdx) => (
+                                        <div key={epIdx} className="p-4 rounded-xl bg-white/[0.01] border border-white/5 hover:border-white/10 transition-all flex flex-col gap-3">
+                                          {/* Episode Title & Metadata line */}
+                                          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+                                            <div className="flex flex-wrap items-center gap-3">
+                                              {/* Ep Number */}
+                                              <div className="flex items-center gap-1 flex-shrink-0">
+                                                <span className="text-[10px] font-black text-white/40 uppercase">EP</span>
+                                                <input
+                                                  type="number"
+                                                  value={episode.episodeNumber}
+                                                  onChange={(e) => handleUpdateEpisodeInForm(sIdx, epIdx, { episodeNumber: Number(e.target.value) })}
+                                                  className="bg-apple-gray-800 text-white border border-white/10 rounded-lg px-2 py-0.5 text-xs font-bold w-12 text-center outline-none"
+                                                />
+                                              </div>
+
+                                              {/* Ep Name */}
+                                              <input
+                                                type="text"
+                                                value={episode.name}
+                                                onChange={(e) => handleUpdateEpisodeInForm(sIdx, epIdx, { name: e.target.value })}
+                                                placeholder="Episode Title"
+                                                className="bg-apple-gray-800 text-white border border-white/10 rounded-lg px-2.5 py-1 text-xs font-bold w-full sm:w-64 focus:border-cyan-500/50 outline-none"
+                                              />
+
+                                              {/* Ep Runtime */}
+                                              <div className="flex items-center gap-1.5 flex-shrink-0">
+                                                <span className="text-[10px] font-black text-white/40 uppercase">Runtime</span>
+                                                <input
+                                                  type="number"
+                                                  value={episode.runtime}
+                                                  onChange={(e) => handleUpdateEpisodeInForm(sIdx, epIdx, { runtime: Number(e.target.value) })}
+                                                  placeholder="45"
+                                                  className="bg-apple-gray-800 text-white border border-white/10 rounded-lg px-2 py-0.5 text-xs font-bold w-14 text-center outline-none"
+                                                />
+                                                <span className="text-[10px] font-bold text-white/45">MIN</span>
+                                              </div>
+                                            </div>
+
+                                            {/* Delete Episode */}
+                                            <button
+                                              type="button"
+                                              onClick={() => handleDeleteEpisodeFromForm(sIdx, epIdx)}
+                                              className="p-1.5 rounded bg-red-600/10 hover:bg-red-600 border border-red-500/10 text-red-400 hover:text-white transition-colors cursor-pointer self-end lg:self-center"
+                                              title="Delete Episode"
+                                            >
+                                              <Trash2 className="w-3.5 h-3.5" />
+                                            </button>
+                                          </div>
+
+                                          {/* Ep Overview Synopsis */}
+                                          <div className="flex flex-col gap-1.5 text-left">
+                                            <label className="text-[9px] font-black text-white/30 uppercase tracking-wide">Episode Synopsis</label>
+                                            <textarea
+                                              value={episode.overview || ''}
+                                              onChange={(e) => handleUpdateEpisodeInForm(sIdx, epIdx, { overview: e.target.value })}
+                                              placeholder="Write an episode synopsis manually."
+                                              className="bg-apple-gray-800/50 text-white border border-white/5 rounded-lg p-2.5 text-xs font-medium focus:border-cyan-500/30 outline-none h-16 resize-none"
+                                            />
+                                          </div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
 
                   {/* Save action bar */}

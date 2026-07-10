@@ -6,15 +6,24 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { tmdbService } from '../services/tmdb';
-import { Actor } from '../types';
+import { dbService } from '../services/db';
+import { Actor, Movie, Series } from '../types';
 import { ArrowLeft, User, Calendar, MapPin, Award, PlayCircle, Star, Sparkles } from 'lucide-react';
 
 export default function ActorPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [actor, setActor] = useState<Actor | null>(null);
+  const [localMovies, setLocalMovies] = useState<Movie[]>([]);
+  const [localSeries, setLocalSeries] = useState<Series[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Load local database items for filtering
+    setLocalMovies(dbService.getMovies());
+    setLocalSeries(dbService.getSeries());
+  }, []);
 
   useEffect(() => {
     if (!id) return;
@@ -68,6 +77,16 @@ export default function ActorPage() {
       </div>
     );
   }
+
+  const filteredFilmography = actor ? actor.filmography.map(role => {
+    if (role.type === 'movie') {
+      const match = localMovies.find(m => m.tmdbId === role.id || m.id === role.id);
+      return match ? { ...role, dbId: match.id } : null;
+    } else {
+      const match = localSeries.find(s => s.tmdbId === role.id || s.id === role.id);
+      return match ? { ...role, dbId: match.id } : null;
+    }
+  }).filter((item): item is NonNullable<typeof item> & { dbId: string } => item !== null) : [];
 
   return (
     <div className="w-full bg-apple-gray-900 min-h-screen pb-20 pt-28 px-6 md:px-12">
@@ -139,21 +158,20 @@ export default function ActorPage() {
           <div className="flex items-center gap-2 border-b border-white/5 pb-4">
             <PlayCircle className="w-6 h-6 text-white" />
             <h2 className="font-sans font-semibold text-xl sm:text-2xl text-white tracking-tight">
-              Filmography & Roles
+              Filmography & Roles in OceanTV
             </h2>
-            <span className="text-xs font-black bg-white/10 text-white/80 px-2.5 py-1 rounded-full border border-white/5 ml-2">
-              {actor.filmography?.length || 0} Entries
+            <span className="text-xs font-black bg-cyan-950/60 text-cyan-400 px-2.5 py-1 rounded-full border border-cyan-500/20 ml-2">
+              {filteredFilmography.length} {filteredFilmography.length === 1 ? 'Entry' : 'Entries'}
             </span>
           </div>
 
-          {actor.filmography && actor.filmography.length > 0 ? (
+          {filteredFilmography.length > 0 ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-5 gap-y-8">
-              {actor.filmography.map((role) => {
-                // Link directly to matching movie or series
+              {filteredFilmography.map((role) => {
                 return (
                   <Link
                     key={`${role.id}-${role.character}`}
-                    to={role.type === 'movie' ? `/movie/${role.id}` : `/series/${role.id}`}
+                    to={role.type === 'movie' ? `/movie/${role.dbId}` : `/series/${role.dbId}`}
                     className="group flex flex-col gap-2.5 cursor-pointer text-left focus:outline-none focus:ring-1 focus:ring-white rounded-2xl"
                   >
                     <div className="relative aspect-[2/3] w-full rounded-2xl overflow-hidden bg-apple-gray-800 border border-white/5 group-hover:scale-104 group-hover:border-white/20 transition-all duration-300 shadow-md group-hover:shadow-xl">
@@ -165,11 +183,11 @@ export default function ActorPage() {
                         className="w-full h-full object-cover"
                       />
                       <div className="absolute top-2 right-2 px-2 py-0.5 rounded-md bg-black/60 text-[10px] font-bold text-white uppercase tracking-wider">
-                        {role.type}
+                        {role.type === 'movie' ? 'Movie' : 'TV Show'}
                       </div>
                     </div>
                     <div className="px-1">
-                      <h4 className="text-xs sm:text-sm font-bold text-white group-hover:text-white truncate">
+                      <h4 className="text-xs sm:text-sm font-bold text-white group-hover:text-cyan-400 transition-colors duration-200 truncate">
                         {role.title}
                       </h4>
                       <p className="text-[10px] text-apple-gray-300 truncate mt-0.5 font-medium leading-none">
@@ -185,7 +203,7 @@ export default function ActorPage() {
             </div>
           ) : (
             <div className="text-center py-16 text-white/30 border border-white/5 rounded-2xl glass-panel">
-              No credits history could be fetched for this individual.
+              No movies or TV shows featuring {actor.name} are currently in OceanTV.
             </div>
           )}
         </div>

@@ -106,33 +106,7 @@ export default function Home() {
         })}
       </div>
 
-      {/* Additional Branding Card */}
-      <div className="max-w-7xl mx-auto px-6 md:px-12 mt-16">
-        <div className="relative overflow-hidden rounded-3xl glass-panel p-8 sm:p-12 flex flex-col md:flex-row items-center justify-between gap-8 border border-white/10 shadow-2xl">
-          <div className="flex flex-col items-start gap-3 max-w-xl">
-            <span className="text-[10px] font-black tracking-widest text-white/50 uppercase">
-              APPLE TV COMPANION
-            </span>
-            <h2 className="font-display font-bold text-2xl sm:text-4xl text-white leading-tight tracking-tight">
-              Curate Your Cinematic Atmosphere
-            </h2>
-            <p className="font-sans text-sm sm:text-base text-apple-gray-300">
-              Browse cinematic masterworks, explore aggregates, and track your favorites with our premium polished interface. Ready for desktop, mobile, and server environments.
-            </p>
-          </div>
 
-          <div className="flex items-center gap-3 w-full sm:w-auto">
-            <div className="flex -space-x-3 overflow-hidden">
-              <img className="inline-block h-12 w-12 rounded-full ring-2 ring-apple-gray-900 object-cover" src="https://image.tmdb.org/t/p/w500/c9X0ZALvImK8R0NfK2g87isIsfG.jpg" alt="" />
-              <img className="inline-block h-12 w-12 rounded-full ring-2 ring-apple-gray-900 object-cover" src="https://image.tmdb.org/t/p/w500/6t29Tshn6F6vMhX1S3E6gGMyS0G.jpg" alt="" />
-              <img className="inline-block h-12 w-12 rounded-full ring-2 ring-apple-gray-900 object-cover" src="https://image.tmdb.org/t/p/w500/6v7bYgTIsMyZ1mshX6Tq1YcT2gI.jpg" alt="" />
-            </div>
-            <span className="text-sm font-semibold text-white/80">
-              1,000+ Synchronized Metadata Entries
-            </span>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

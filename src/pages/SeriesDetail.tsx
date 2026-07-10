@@ -210,77 +210,54 @@ export default function SeriesDetail() {
         </div>
       </div>
 
-      {/* Seasons & Episodes Tab Selector Section */}
+      {/* Seasons & Episodes Section */}
       {series.seasons && series.seasons.length > 0 && (
         <div className="max-w-7xl mx-auto px-6 md:px-12 mt-16 text-left">
           
-          <div className="flex items-center justify-between border-b border-white/5 pb-4 mb-6">
+          <div className="border-b border-white/5 pb-4 mb-8">
             <div className="flex items-center gap-2.5">
-              <Layers className="w-5.5 h-5.5 text-white/80" />
+              <Layers className="w-5.5 h-5.5 text-cyan-400" />
               <h2 className="font-sans font-semibold text-xl sm:text-2xl text-white tracking-tight">
-                Seasons & Episode Guide
+                Seasons & Episodes
               </h2>
-            </div>
-
-            {/* Season Selector Tabs */}
-            <div className="flex gap-2 bg-white/5 p-1 rounded-xl border border-white/5">
-              {series.seasons.map((season, sIdx) => (
-                <button
-                  key={season.seasonNumber}
-                  onClick={() => setSelectedSeasonIdx(sIdx)}
-                  className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                    sIdx === selectedSeasonIdx
-                      ? 'bg-white text-black shadow-md'
-                      : 'text-white/60 hover:text-white'
-                  }`}
-                >
-                  {season.name || `Season ${season.seasonNumber}`}
-                </button>
-              ))}
             </div>
           </div>
 
-          {/* Episode Grid Matrix */}
-          {currentSeason && currentSeason.episodes && currentSeason.episodes.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {currentSeason.episodes.map((ep) => (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-5">
+            {series.seasons.map((season) => {
+              const epCount = season.episodes?.length || 0;
+              return (
                 <div
-                  key={ep.episodeNumber}
-                  className="glass-panel p-5 rounded-2xl border border-white/5 flex gap-4 hover:border-white/10 hover:bg-white/4 transition-all duration-300"
+                  key={season.seasonNumber}
+                  className="group relative overflow-hidden rounded-2xl bg-white/[0.01] hover:bg-white/[0.04] border border-white/5 hover:border-cyan-500/30 transition-all duration-300 p-5 flex flex-col gap-3"
                 >
-                  {/* Episode Index Circle */}
-                  <div className="w-10 h-10 rounded-full bg-white/5 text-white flex items-center justify-center font-bold text-sm flex-shrink-0 border border-white/5 shadow-inner">
-                    {ep.episodeNumber}
+                  {/* Subtle backdrop overlay with backdropPath behind */}
+                  <div className="absolute inset-0 -z-10 opacity-5 group-hover:opacity-10 transition-opacity duration-300">
+                    <img
+                      src={series.backdropPath}
+                      alt=""
+                      className="w-full h-full object-cover filter blur-sm scale-105"
+                      referrerPolicy="no-referrer"
+                    />
+                  </div>
+                  
+                  {/* Icon/Decoration */}
+                  <div className="w-10 h-10 rounded-xl bg-cyan-950/40 border border-cyan-500/10 text-cyan-400 flex items-center justify-center font-bold text-xs">
+                    S{String(season.seasonNumber).padStart(2, '0')}
                   </div>
 
-                  {/* Episode metadata */}
-                  <div className="flex-1 flex flex-col gap-1.5 min-w-0">
-                    <div className="flex items-center justify-between gap-2">
-                      <h4 className="font-sans font-bold text-sm sm:text-base text-white truncate">
-                        {ep.name}
-                      </h4>
-                      <span className="text-[10px] font-black text-apple-gray-300 bg-white/5 px-2 py-0.5 rounded-md border border-white/5 uppercase whitespace-nowrap">
-                        {ep.runtime} Min
-                      </span>
-                    </div>
-                    {ep.overview ? (
-                      <p className="text-xs sm:text-sm text-apple-gray-300 font-medium leading-relaxed line-clamp-2">
-                        {ep.overview}
-                      </p>
-                    ) : (
-                      <p className="text-xs sm:text-sm text-white/30 italic">
-                        No episode overview available.
-                      </p>
-                    )}
+                  <div className="flex flex-col gap-1 mt-1">
+                    <h3 className="font-sans font-bold text-xs sm:text-sm text-white group-hover:text-cyan-400 transition-colors duration-200">
+                      {season.name || `Season ${season.seasonNumber}`}
+                    </h3>
+                    <p className="font-mono text-[10px] text-white/50 group-hover:text-cyan-300/80 transition-colors duration-200">
+                      {epCount} {epCount === 1 ? 'Episode' : 'Episodes'}
+                    </p>
                   </div>
                 </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12 text-white/40 border border-white/5 rounded-2xl glass-panel">
-              No episode lists available for this season.
-            </div>
-          )}
+              );
+            })}
+          </div>
 
         </div>
       )}
