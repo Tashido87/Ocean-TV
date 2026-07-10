@@ -131,9 +131,10 @@ export default function Admin() {
   // --- STATE FOR HOMEPAGE MANAGEMENT ---
   const [sections, setSections] = useState<HomeSection[]>([]);
   const [newSectionTitle, setNewSectionTitle] = useState('');
-  const [newSectionType, setNewSectionType] = useState<'movies' | 'series'>('movies');
+  const [newSectionType, setNewSectionType] = useState<'movies' | 'series' | 'both'>('movies');
   const [newSectionListType, setNewSectionListType] = useState<HomeSection['listType']>('trending');
   const [newSectionVal, setNewSectionVal] = useState('');
+  const [newSectionSortBy, setNewSectionSortBy] = useState<HomeSection['sortBy']>('none');
 
   // --- STATE FOR TMDB AUTOCOMPLETE SEARCH ---
   const [movieSearchQuery, setMovieSearchQuery] = useState('');
@@ -604,10 +605,12 @@ export default function Admin() {
       value: newSectionVal,
       order: sections.length,
       isVisible: true,
+      sortBy: newSectionSortBy,
     });
 
     setNewSectionTitle('');
     setNewSectionVal('');
+    setNewSectionSortBy('none');
     triggerSuccessBanner('Created new row list section!');
     loadDbData();
   };
@@ -1773,11 +1776,14 @@ export default function Admin() {
                       <div className="flex items-center gap-2">
                         <h4 className="font-sans font-bold text-base text-white">{sec.title}</h4>
                         <span className="px-2 py-0.5 rounded text-[9px] font-black bg-white/10 text-white/80 uppercase">
-                          {sec.type}
+                          {sec.type === 'both' ? 'Movies & Shows' : sec.type}
                         </span>
                       </div>
                       <p className="text-xs text-apple-gray-300 font-mono mt-1">
                         Row source: <span className="text-emerald-400">{sec.listType}</span> {sec.value ? `(${sec.value})` : ''}
+                        {sec.sortBy && sec.sortBy !== 'none' && (
+                          <> • Sort: <span className="text-amber-400">{sec.sortBy === 'latest' ? 'latest released' : 'most popular'}</span></>
+                        )}
                       </p>
                     </div>
 
@@ -1857,6 +1863,7 @@ export default function Admin() {
                     >
                       <option value="movies">Movies</option>
                       <option value="series">TV Shows</option>
+                      <option value="both">Both (Movies & TV Shows)</option>
                     </select>
                   </div>
 
@@ -1872,26 +1879,40 @@ export default function Admin() {
                       <option value="recently_added">Recently Added (by date)</option>
                       <option value="editors_picks">Editor's Picks</option>
                       <option value="genre">Specific Genre Filter</option>
+                      <option value="language">Specific Language Filter</option>
                       <option value="custom">Custom ID List</option>
                     </select>
                   </div>
 
                   {/* specific filter rules helper */}
-                  {(newSectionListType === 'genre' || newSectionListType === 'custom') && (
+                  {(newSectionListType === 'genre' || newSectionListType === 'language' || newSectionListType === 'custom') && (
                     <div className="flex flex-col gap-1">
                       <label className="text-[9px] font-black text-white/40 uppercase">
-                        {newSectionListType === 'genre' ? 'Genre name' : 'Comma-separated IDs'}
+                        {newSectionListType === 'genre' ? 'Genre name' : newSectionListType === 'language' ? 'Language name' : 'Comma-separated IDs'}
                       </label>
                       <input
                         type="text"
                         value={newSectionVal}
                         onChange={(e) => setNewSectionVal(e.target.value)}
-                        placeholder={newSectionListType === 'genre' ? 'e.g. Sci-Fi' : 'e.g. dune-2, inter-1'}
-                        className="bg-apple-gray-800 text-white border border-white/10 rounded-lg p-2.5 text-xs font-semibold"
+                        placeholder={newSectionListType === 'genre' ? 'e.g. Sci-Fi' : newSectionListType === 'language' ? 'e.g. Korean' : 'e.g. dune-2, inter-1'}
+                        className="bg-apple-gray-800 text-white border border-white/10 rounded-lg p-2.5 text-xs font-semibold outline-none"
                         required
                       />
                     </div>
                   )}
+
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[9px] font-black text-white/40 uppercase">Sort Order</label>
+                    <select
+                      value={newSectionSortBy}
+                      onChange={(e: any) => setNewSectionSortBy(e.target.value)}
+                      className="bg-apple-gray-800 text-white border border-white/10 rounded-lg p-2 text-xs font-bold outline-none"
+                    >
+                      <option value="none">Default (Auto-Sorted)</option>
+                      <option value="latest">Latest Released (by Release Year)</option>
+                      <option value="popular">Most Popular (by Rating)</option>
+                    </select>
+                  </div>
 
                   <button
                     type="submit"

@@ -54,37 +54,90 @@ export default function Home() {
 
   // Resolves the list of movies/series for a specific section
   const resolveSectionItems = (section: HomeSection) => {
-    const isMovies = section.type === 'movies';
-    const itemsList = isMovies ? movies : series;
+    let itemsList: (Movie | Series)[] = [];
+    if (section.type === 'movies') {
+      itemsList = movies;
+    } else if (section.type === 'series') {
+      itemsList = series;
+    } else {
+      itemsList = [...movies, ...series];
+    }
 
+    let filtered = [...itemsList];
+
+    // 1. Filter by listType
     switch (section.listType) {
       case 'trending':
-        return [...itemsList].sort((a, b) => b.rating - a.rating).slice(0, 10);
+        if (!section.sortBy || section.sortBy === 'none') {
+          filtered.sort((a, b) => b.rating - a.rating);
+        }
+        break;
 
       case 'popular':
-        return [...itemsList].filter(item => item.rating >= 7.5).slice(0, 10);
+        filtered = filtered.filter(item => item.rating >= 7.5);
+        if (!section.sortBy || section.sortBy === 'none') {
+          filtered.sort((a, b) => b.rating - a.rating);
+        }
+        break;
 
       case 'recently_added':
-        return [...itemsList]
-          .sort((a, b) => new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime())
-          .slice(0, 10);
+        if (!section.sortBy || section.sortBy === 'none') {
+          filtered.sort((a, b) => new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime());
+        }
+        break;
 
       case 'editors_picks':
-        return [...itemsList].filter(item => item.featured).slice(0, 10);
+        filtered = filtered.filter(item => (item as any).featured || (item as any).heroBanner);
+        break;
 
       case 'genre':
-        return [...itemsList]
-          .filter(item => item.genres?.includes(section.value || ''))
-          .slice(0, 10);
+        if (section.value) {
+          const val = section.value.trim().toLowerCase();
+          filtered = filtered.filter(item => 
+            item.genres?.some(g => g.toLowerCase() === val)
+          );
+        }
+        break;
+
+      case 'language':
+        if (section.value) {
+          const val = section.value.trim().toLowerCase();
+          filtered = filtered.filter(item => 
+            item.language?.toLowerCase() === val
+          );
+        }
+        break;
 
       case 'custom':
-        if (!section.value) return [];
-        const ids = section.value.split(',').map(id => id.trim());
-        return itemsList.filter(item => ids.includes(item.id));
+        if (section.value) {
+          const ids = section.value.split(',').map(id => id.trim());
+          filtered = filtered.filter(item => ids.includes(item.id));
+        } else {
+          filtered = [];
+        }
+        break;
 
       default:
-        return [];
+        break;
     }
+
+    // 2. Apply Custom Sorting override if specified
+    if (section.sortBy && section.sortBy !== 'none') {
+      if (section.sortBy === 'latest') {
+        filtered.sort((a, b) => {
+          const yearA = parseInt(a.releaseYear) || 0;
+          const yearB = parseInt(b.releaseYear) || 0;
+          if (yearB !== yearA) {
+            return yearB - yearA;
+          }
+          return new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime();
+        });
+      } else if (section.sortBy === 'popular') {
+        filtered.sort((a, b) => b.rating - a.rating);
+      }
+    }
+
+    return filtered.slice(0, 15);
   };
 
   return (

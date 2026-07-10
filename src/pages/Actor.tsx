@@ -80,15 +80,95 @@ export default function ActorPage() {
     );
   }
 
-  const filteredFilmography = actor ? actor.filmography.map(role => {
-    if (role.type === 'movie') {
-      const match = localMovies.find(m => m.tmdbId === role.id || m.id === role.id);
-      return match ? { ...role, dbId: match.id } : null;
-    } else {
-      const match = localSeries.find(s => s.tmdbId === role.id || s.id === role.id);
-      return match ? { ...role, dbId: match.id } : null;
-    }
-  }).filter((item): item is NonNullable<typeof item> & { dbId: string } => item !== null) : [];
+  const filteredFilmography = (() => {
+    if (!actor) return [];
+
+    const itemsMap = new Map<string, {
+      id: string;
+      title: string;
+      type: 'movie' | 'series';
+      character: string;
+      releaseYear: string;
+      posterPath: string | null;
+      dbId: string;
+    }>();
+
+    // 1. Scan local movies where the actor is listed in the cast list
+    localMovies.forEach(m => {
+      const castMember = m.cast?.find(c => 
+        String(c.id) === String(id) || 
+        c.name.trim().toLowerCase() === actor.name.trim().toLowerCase()
+      );
+      if (castMember) {
+        itemsMap.set(m.id, {
+          id: m.tmdbId || m.id,
+          dbId: m.id,
+          title: m.title,
+          type: 'movie',
+          character: castMember.character || 'Cast',
+          releaseYear: m.releaseYear,
+          posterPath: m.posterPath || null
+        });
+      }
+    });
+
+    // 2. Scan local series where the actor is listed in the cast list
+    localSeries.forEach(s => {
+      const castMember = s.cast?.find(c => 
+        String(c.id) === String(id) || 
+        c.name.trim().toLowerCase() === actor.name.trim().toLowerCase()
+      );
+      if (castMember) {
+        itemsMap.set(s.id, {
+          id: s.tmdbId || s.id,
+          dbId: s.id,
+          title: s.title,
+          type: 'series',
+          character: castMember.character || 'Cast',
+          releaseYear: s.releaseYear,
+          posterPath: s.posterPath || null
+        });
+      }
+    });
+
+    // 3. Scan actor's TMDB filmography and match with local items to cover any extra edge cases
+    actor.filmography.forEach(role => {
+      if (role.type === 'movie') {
+        const match = localMovies.find(m => m.tmdbId === role.id || m.id === role.id);
+        if (match && !itemsMap.has(match.id)) {
+          itemsMap.set(match.id, {
+            id: role.id,
+            dbId: match.id,
+            title: match.title || role.title,
+            type: 'movie',
+            character: role.character || 'Cast',
+            releaseYear: match.releaseYear || role.releaseYear,
+            posterPath: match.posterPath || role.posterPath,
+          });
+        }
+      } else {
+        const match = localSeries.find(s => s.tmdbId === role.id || s.id === role.id);
+        if (match && !itemsMap.has(match.id)) {
+          itemsMap.set(match.id, {
+            id: role.id,
+            dbId: match.id,
+            title: match.title || role.title,
+            type: 'series',
+            character: role.character || 'Cast',
+            releaseYear: match.releaseYear || role.releaseYear,
+            posterPath: match.posterPath || role.posterPath,
+          });
+        }
+      }
+    });
+
+    // Convert map to array and sort by releaseYear descending
+    return Array.from(itemsMap.values()).sort((a, b) => {
+      const yearA = parseInt(a.releaseYear) || 0;
+      const yearB = parseInt(b.releaseYear) || 0;
+      return yearB - yearA;
+    });
+  })();
 
   return (
     <div className="w-full bg-apple-gray-900 min-h-screen pb-20 pt-28 px-6 md:px-12">

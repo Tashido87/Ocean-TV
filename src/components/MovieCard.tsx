@@ -11,11 +11,11 @@ import { Movie, Series } from '../types';
 interface MovieCardProps {
   key?: string | number;
   item: Movie | Series;
-  type: 'movie' | 'series';
+  type: 'movie' | 'series' | 'both';
 }
 
 export default function MovieCard({ item, type }: MovieCardProps) {
-  const isMovie = type === 'movie';
+  const isMovie = type === 'both' ? !('seasons' in item) : type === 'movie';
   const rating = item.rating ? Number(item.rating).toFixed(1) : 'N/A';
   
   // Custom badges for subtitle availability

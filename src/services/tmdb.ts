@@ -285,7 +285,7 @@ export const tmdbService = {
           const yearB = parseInt(b.releaseYear) || 0;
           return yearB - yearA;
         })
-        .slice(0, 30); // top 30 roles
+        .slice(0, 150); // top 150 roles
 
       const nationality = data.place_of_birth ? data.place_of_birth.split(',').pop()?.trim() : 'Unknown';
 

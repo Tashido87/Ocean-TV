@@ -90,9 +90,10 @@ export interface Series {
 export interface HomeSection {
   id: string;
   title: string;
-  type: 'movies' | 'series';
-  listType: 'trending' | 'popular' | 'recently_added' | 'editors_picks' | 'genre' | 'custom';
-  value?: string; // genre name, or comma-separated list of IDs
+  type: 'movies' | 'series' | 'both';
+  listType: 'trending' | 'popular' | 'recently_added' | 'editors_picks' | 'genre' | 'custom' | 'language';
+  value?: string; // genre name, language name, or comma-separated list of IDs
   order: number;
   isVisible: boolean;
+  sortBy?: 'latest' | 'popular' | 'rating' | 'none';
 }

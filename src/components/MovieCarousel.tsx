@@ -12,7 +12,7 @@ interface MovieCarouselProps {
   key?: string | number;
   title: string;
   items: (Movie | Series)[];
-  type: 'movie' | 'series' | 'movies';
+  type: 'movie' | 'series' | 'movies' | 'both';
   badgeText?: string;
 }
 
