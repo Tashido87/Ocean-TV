@@ -60,7 +60,7 @@ export default function MovieCarousel({ title, items, type, badgeText }: MovieCa
   if (items.length === 0) return null;
 
   return (
-    <div className="relative group/carousel my-8 px-6 md:px-12">
+    <div className="relative group/carousel my-4 px-6 md:px-12">
       {/* Section Header */}
       <div className="flex items-center gap-3 mb-4">
         <h2 className="font-sans font-semibold text-lg sm:text-2xl tracking-tight text-white/95">

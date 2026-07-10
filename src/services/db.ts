@@ -301,25 +301,46 @@ const initDatabase = async () => {
     localStorage.setItem(KEYS.RECENTLY_VIEWED, JSON.stringify([]));
   }
 
-  // 2. Synchronize up to Firestore if Firestore is empty
+  // 2. Synchronize up to Firestore and upload any locally added/custom items that are missing in Firestore
   try {
     const moviesColl = collection(firestore, 'movies');
     const moviesSnap = await getDocs(moviesColl);
+    const firestoreMovieIds = new Set(moviesSnap.docs.map(doc => doc.id));
+    
+    const localMoviesList: Movie[] = JSON.parse(localStorage.getItem(KEYS.MOVIES) || '[]');
+    
     if (moviesSnap.empty) {
       console.log('Seeding movies to Firestore from local database...');
-      const localMoviesList: Movie[] = JSON.parse(localStorage.getItem(KEYS.MOVIES) || '[]');
       for (const movie of localMoviesList) {
         await setDoc(doc(firestore, 'movies', movie.id), movie);
+      }
+    } else {
+      // Sync any missing local items (e.g. "One Way Trip") to Firestore
+      for (const movie of localMoviesList) {
+        if (!firestoreMovieIds.has(movie.id)) {
+          console.log(`Syncing missing local movie "${movie.title}" (${movie.id}) to Firestore...`);
+          await setDoc(doc(firestore, 'movies', movie.id), movie);
+        }
       }
     }
 
     const seriesColl = collection(firestore, 'series');
     const seriesSnap = await getDocs(seriesColl);
+    const firestoreSeriesIds = new Set(seriesSnap.docs.map(doc => doc.id));
+    const localSeriesList: Series[] = JSON.parse(localStorage.getItem(KEYS.SERIES) || '[]');
+    
     if (seriesSnap.empty) {
       console.log('Seeding series to Firestore from local database...');
-      const localSeriesList: Series[] = JSON.parse(localStorage.getItem(KEYS.SERIES) || '[]');
       for (const s of localSeriesList) {
         await setDoc(doc(firestore, 'series', s.id), s);
+      }
+    } else {
+      // Sync any missing local items to Firestore
+      for (const s of localSeriesList) {
+        if (!firestoreSeriesIds.has(s.id)) {
+          console.log(`Syncing missing local series "${s.title}" (${s.id}) to Firestore...`);
+          await setDoc(doc(firestore, 'series', s.id), s);
+        }
       }
     }
 
@@ -624,15 +645,18 @@ export const dbService = {
 
   // --- ADMIN AUTH (Perfect Firebase Auth simulations for Netlify/standalone compatibility) ---
   isAdminLoggedIn(): boolean {
-    return !!localStorage.getItem(KEYS.ADMIN_TOKEN);
+    const email = localStorage.getItem('cineapple_admin_email');
+    return !!localStorage.getItem(KEYS.ADMIN_TOKEN) && email?.trim().toLowerCase() === 'herozboy@gmail.com';
   },
 
   loginAdmin(email: string, pin: string): { success: boolean; error?: string } {
-    if (email.trim().toLowerCase() !== 'herozboy@gmail.com') {
+    const formattedEmail = email.trim().toLowerCase();
+    if (formattedEmail !== 'herozboy@gmail.com') {
       return { success: false, error: 'Access denied: Only herozboy@gmail.com is authorized.' };
     }
     if (pin === 'admin123' || pin === 'apple2026') {
       localStorage.setItem(KEYS.ADMIN_TOKEN, `admin_session_${Date.now()}`);
+      localStorage.setItem('cineapple_admin_email', formattedEmail);
       window.dispatchEvent(new Event('admin_auth_changed'));
       return { success: true };
     }
@@ -641,6 +665,7 @@ export const dbService = {
 
   logoutAdmin(): void {
     localStorage.removeItem(KEYS.ADMIN_TOKEN);
+    localStorage.removeItem('cineapple_admin_email');
     window.dispatchEvent(new Event('admin_auth_changed'));
   },
 };

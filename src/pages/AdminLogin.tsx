@@ -38,6 +38,7 @@ export default function AdminLogin() {
         const email = event.data.email?.toLowerCase();
         if (email === 'herozboy@gmail.com') {
           localStorage.setItem('cineapple_admin_token', `google_session_${Date.now()}`);
+          localStorage.setItem('cineapple_admin_email', email);
           window.dispatchEvent(new Event('admin_auth_changed'));
           navigate('/admin');
         } else {
@@ -104,6 +105,7 @@ export default function AdminLogin() {
       const email = sandboxEmail.trim().toLowerCase();
       if (email === 'herozboy@gmail.com') {
         localStorage.setItem('cineapple_admin_token', `sandbox_session_${Date.now()}`);
+        localStorage.setItem('cineapple_admin_email', email);
         window.dispatchEvent(new Event('admin_auth_changed'));
         setShowSetupModal(false);
         navigate('/admin');

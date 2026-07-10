@@ -84,7 +84,7 @@ export default function SeriesDetail() {
   const currentSeason = series.seasons?.[selectedSeasonIdx] || null;
 
   return (
-    <div className="w-full bg-apple-gray-900 min-h-screen pb-20">
+    <div className="w-full bg-apple-gray-900 min-h-screen pb-6">
       
       {/* Background Backdrop */}
       <div className="relative w-full h-[50vh] sm:h-[65vh] md:h-[80vh] overflow-hidden">
