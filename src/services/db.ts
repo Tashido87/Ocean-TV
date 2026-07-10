@@ -297,10 +297,38 @@ const initDatabase = async () => {
     let patched = false;
     const updatedSeries = existingSeries.map((s: Series) => {
       const match = SEED_SERIES.find((seed) => seed.tmdbId === s.tmdbId || seed.id === s.id);
-      if (match && (s.posterPath !== match.posterPath || s.backdropPath !== match.backdropPath)) {
-        s.posterPath = match.posterPath;
-        s.backdropPath = match.backdropPath;
-        patched = true;
+      if (match) {
+        let changed = false;
+        if (s.posterPath !== match.posterPath || s.backdropPath !== match.backdropPath) {
+          s.posterPath = match.posterPath;
+          s.backdropPath = match.backdropPath;
+          changed = true;
+        }
+        if (!s.cast || s.cast.length === 0) {
+          s.cast = match.cast;
+          changed = true;
+        }
+        if (!s.director || s.director === 'Unknown' || s.director === 'Unknown Director') {
+          s.director = match.director;
+          changed = true;
+        }
+        if (!s.writer || s.writer === 'Unknown' || s.writer === 'Unknown Writer') {
+          s.writer = match.writer;
+          changed = true;
+        }
+        if (!s.producer || s.producer === 'Unknown' || s.producer === 'Unknown Producer') {
+          s.producer = match.producer;
+          changed = true;
+        }
+        if (!s.studio || s.studio === 'Unknown' || s.studio === 'Unknown Studio') {
+          s.studio = match.studio;
+          changed = true;
+        }
+        if (!s.country || s.country === 'Unknown') {
+          s.country = match.country;
+          changed = true;
+        }
+        if (changed) patched = true;
       }
       return s;
     });
@@ -360,6 +388,47 @@ const initDatabase = async () => {
         if (!firestoreSeriesIds.has(s.id)) {
           console.log(`Syncing missing local series "${s.title}" (${s.id}) to Firestore...`);
           await setDoc(doc(firestore, 'series', s.id), s);
+        }
+      }
+
+      // Automatically patch existing series in Firestore if they are missing crew/cast fields
+      for (const docSnap of seriesSnap.docs) {
+        const firestoreSeries = docSnap.data() as Series;
+        const match = SEED_SERIES.find((seed) => seed.tmdbId === firestoreSeries.tmdbId || seed.id === firestoreSeries.id);
+        if (match) {
+          let needsUpdate = false;
+          const updatedFields: any = {};
+
+          if (!firestoreSeries.cast || firestoreSeries.cast.length === 0) {
+            updatedFields.cast = match.cast || [];
+            needsUpdate = true;
+          }
+          if (!firestoreSeries.director || firestoreSeries.director === 'Unknown' || firestoreSeries.director === 'Unknown Director') {
+            updatedFields.director = match.director || 'Unknown';
+            needsUpdate = true;
+          }
+          if (!firestoreSeries.writer || firestoreSeries.writer === 'Unknown' || firestoreSeries.writer === 'Unknown Writer') {
+            updatedFields.writer = match.writer || 'Unknown';
+            needsUpdate = true;
+          }
+          if (!firestoreSeries.producer || firestoreSeries.producer === 'Unknown' || firestoreSeries.producer === 'Unknown Producer') {
+            updatedFields.producer = match.producer || 'Unknown';
+            needsUpdate = true;
+          }
+          if (!firestoreSeries.studio || firestoreSeries.studio === 'Unknown' || firestoreSeries.studio === 'Unknown Studio') {
+            updatedFields.studio = match.studio || 'Unknown';
+            needsUpdate = true;
+          }
+          if (!firestoreSeries.country || firestoreSeries.country === 'Unknown') {
+            updatedFields.country = match.country || 'Unknown';
+            needsUpdate = true;
+          }
+
+          if (needsUpdate) {
+            console.log(`Patching existing Firestore series "${firestoreSeries.title}" (${firestoreSeries.id}) with new crew & cast fields...`);
+            const merged = { ...firestoreSeries, ...updatedFields };
+            await setDoc(doc(firestore, 'series', firestoreSeries.id), merged).catch(console.error);
+          }
         }
       }
     }
