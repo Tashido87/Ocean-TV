@@ -12,6 +12,7 @@ import Series from './pages/Series';
 import MovieDetail from './pages/MovieDetail';
 import SeriesDetail from './pages/SeriesDetail';
 import Actor from './pages/Actor';
+import Director from './pages/Director';
 import Search from './pages/Search';
 import Favorites from './pages/Favorites';
 import Admin from './pages/Admin';
@@ -55,6 +56,7 @@ export default function App() {
             <Route path="/movie/:id" element={<MovieDetail />} />
             <Route path="/series/:id" element={<SeriesDetail />} />
             <Route path="/actor/:id" element={<Actor />} />
+            <Route path="/director/:name" element={<Director />} />
             <Route path="/search" element={<Search />} />
             <Route path="/favorites" element={<Favorites />} />
             <Route path="/admin" element={<Admin />} />

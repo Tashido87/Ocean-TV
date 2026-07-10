@@ -187,7 +187,7 @@ export default function MovieDetail() {
             <h3 className="text-xs font-black text-white/40 tracking-wider uppercase">
               Story Summary (Curated manually)
             </h3>
-            <p className="font-sans text-sm sm:text-base text-apple-gray-100 leading-relaxed font-medium">
+            <p className="font-sans text-sm sm:text-base text-apple-gray-100 leading-relaxed font-medium whitespace-pre-line">
               {movie.customStory || "No story summary available. Write one in the Admin Dashboard."}
             </p>
           </div>
@@ -199,7 +199,17 @@ export default function MovieDetail() {
                 <Users className="w-3.5 h-3.5" /> Directing & Screenplay
               </span>
               <div className="text-sm font-bold text-white mt-1">
-                <span className="text-apple-gray-300 text-xs font-medium">Director:</span> {movie.director || 'Unknown'}
+                <span className="text-apple-gray-300 text-xs font-medium">Director:</span>{' '}
+                {movie.director ? (
+                  <Link
+                    to={`/director/${encodeURIComponent(movie.director)}`}
+                    className="text-cyan-400 hover:text-cyan-300 hover:underline transition-colors cursor-pointer"
+                  >
+                    {movie.director}
+                  </Link>
+                ) : (
+                  'Unknown'
+                )}
               </div>
               <div className="text-sm font-bold text-white">
                 <span className="text-apple-gray-300 text-xs font-medium">Writer:</span> {movie.writer || 'Unknown'}

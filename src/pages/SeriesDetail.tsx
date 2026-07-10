@@ -193,7 +193,7 @@ export default function SeriesDetail() {
             <h3 className="text-xs font-black text-white/40 tracking-wider uppercase">
               Story Summary (Curated manually)
             </h3>
-            <p className="font-sans text-sm sm:text-base text-apple-gray-100 leading-relaxed font-medium">
+            <p className="font-sans text-sm sm:text-base text-apple-gray-100 leading-relaxed font-medium whitespace-pre-line">
               {series.customStory || "No story summary available. Write one in the Admin Dashboard."}
             </p>
           </div>
