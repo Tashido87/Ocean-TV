@@ -145,6 +145,10 @@ export default function Admin() {
   const [showSeriesDropdown, setShowSeriesDropdown] = useState(false);
   const [isSearchingSeries, setIsSearchingSeries] = useState(false);
 
+  // --- STATE FOR LOCAL CATALOGUE FILTERING ---
+  const [localMovieQuery, setLocalMovieQuery] = useState('');
+  const [localSeriesQuery, setLocalSeriesQuery] = useState('');
+
   // --- GENERAL ---
   const [successBanner, setSuccessBanner] = useState('');
 
@@ -556,6 +560,20 @@ export default function Admin() {
   if (!isLoggedIn) {
     return null;
   }
+
+  const filteredLocalMovies = localMovieQuery.trim() === ''
+    ? movies.slice(0, 10)
+    : movies.filter(m => 
+        m.title.toLowerCase().includes(localMovieQuery.toLowerCase()) || 
+        (m.originalTitle && m.originalTitle.toLowerCase().includes(localMovieQuery.toLowerCase()))
+      );
+
+  const filteredLocalSeries = localSeriesQuery.trim() === ''
+    ? series.slice(0, 10)
+    : series.filter(s => 
+        s.title.toLowerCase().includes(localSeriesQuery.toLowerCase()) || 
+        (s.originalTitle && s.originalTitle.toLowerCase().includes(localSeriesQuery.toLowerCase()))
+      );
 
   return (
     <div className="w-full bg-apple-gray-900 min-h-screen pt-28 pb-20 px-6 md:px-12">
@@ -975,48 +993,91 @@ export default function Admin() {
 
             {/* RIGHT 1/3: Movies Record Index List */}
             <div className="flex flex-col gap-4">
-              <h3 className="text-xs font-black text-white/35 tracking-wider uppercase">Active Movie Catalogue</h3>
-              <div className="flex flex-col gap-3 max-h-[750px] overflow-y-auto custom-scrollbar pr-2">
-                {movies.map((m) => (
-                  <div
-                    key={m.id}
-                    className="glass-panel p-4 rounded-2xl border border-white/5 flex items-center justify-between gap-4"
+              <div className="flex flex-col gap-1.5 text-left">
+                <h3 className="text-xs font-black text-white/35 tracking-wider uppercase">Active Movie Catalogue</h3>
+                <span className="text-[11px] text-white/50 font-medium leading-tight">
+                  With thousands of entries, type any movie name to search, edit subtitles, or remove.
+                </span>
+              </div>
+
+              {/* Local Search Input */}
+              <div className="relative">
+                <input
+                  type="text"
+                  value={localMovieQuery}
+                  onChange={(e) => setLocalMovieQuery(e.target.value)}
+                  placeholder="Type movie name to manage..."
+                  className="w-full bg-apple-gray-800 text-white border border-white/10 rounded-xl pl-9 pr-8 py-2.5 text-xs font-bold focus:border-cyan-500/50 outline-none"
+                />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+                {localMovieQuery && (
+                  <button
+                    type="button"
+                    onClick={() => setLocalMovieQuery('')}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-white/40 hover:text-white font-bold cursor-pointer"
                   >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <img
-                        src={m.posterPath}
-                        alt=""
-                        className="w-10 h-14 rounded-lg object-cover flex-shrink-0"
-                      />
-                      <div className="min-w-0 text-left">
-                        <h4 className="text-xs sm:text-sm font-bold text-white truncate max-w-[130px]">{m.title}</h4>
-                        <p className="text-[10px] text-apple-gray-300 font-mono mt-0.5">{m.releaseYear} • {m.runtime}m</p>
-                        {m.heroBanner && (
-                          <span className="inline-block px-1.5 py-0.5 rounded text-[8px] font-black bg-emerald-500/10 text-emerald-400 border border-emerald-500/10 mt-1 uppercase">
-                            Hero Slide
-                          </span>
-                        )}
+                    Clear
+                  </button>
+                )}
+              </div>
+
+              {/* List Indicator Badge */}
+              <div className="flex items-center justify-between px-1">
+                <span className="text-[10px] font-black uppercase text-cyan-400 font-mono tracking-wider">
+                  {localMovieQuery.trim() === '' ? 'Recent Additions (first 10)' : `Matches (${filteredLocalMovies.length})`}
+                </span>
+                <span className="text-[10px] text-white/40 font-bold">
+                  Total: {movies.length}
+                </span>
+              </div>
+
+              <div className="flex flex-col gap-3 max-h-[620px] overflow-y-auto custom-scrollbar pr-2">
+                {filteredLocalMovies.length === 0 ? (
+                  <div className="text-center py-12 text-white/30 text-xs border border-dashed border-white/5 rounded-2xl glass-panel">
+                    {localMovieQuery.trim() === '' ? 'No movies recorded yet.' : 'No movies match your search query.'}
+                  </div>
+                ) : (
+                  filteredLocalMovies.map((m) => (
+                    <div
+                      key={m.id}
+                      className="glass-panel p-4 rounded-2xl border border-white/5 flex items-center justify-between gap-4"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <img
+                          src={m.posterPath}
+                          alt=""
+                          className="w-10 h-14 rounded-lg object-cover flex-shrink-0"
+                        />
+                        <div className="min-w-0 text-left">
+                          <h4 className="text-xs sm:text-sm font-bold text-white truncate max-w-[130px]">{m.title}</h4>
+                          <p className="text-[10px] text-apple-gray-300 font-mono mt-0.5">{m.releaseYear} • {m.runtime}m</p>
+                          {m.heroBanner && (
+                            <span className="inline-block px-1.5 py-0.5 rounded text-[8px] font-black bg-emerald-500/10 text-emerald-400 border border-emerald-500/10 mt-1 uppercase">
+                              Hero Slide
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex gap-1.5 flex-shrink-0">
+                        <button
+                          onClick={() => handleEditMovieClick(m)}
+                          className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-white/80 transition-colors cursor-pointer"
+                          title="Edit Details"
+                        >
+                          <Edit2 className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteMovieClick(m.id, m.title)}
+                          className="p-2 rounded-lg bg-red-600/15 hover:bg-red-600 text-red-400 hover:text-white transition-colors cursor-pointer animate-pulse"
+                          title="Delete Record"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
                       </div>
                     </div>
-
-                    <div className="flex gap-1.5 flex-shrink-0">
-                      <button
-                        onClick={() => handleEditMovieClick(m)}
-                        className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-white/80 transition-colors cursor-pointer"
-                        title="Edit Details"
-                      >
-                        <Edit2 className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteMovieClick(m.id, m.title)}
-                        className="p-2 rounded-lg bg-red-600/15 hover:bg-red-600 text-red-400 hover:text-white transition-colors cursor-pointer animate-pulse"
-                        title="Delete Record"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </div>
 
@@ -1469,46 +1530,89 @@ export default function Admin() {
 
             {/* RIGHT 1/3: TV Series list */}
             <div className="flex flex-col gap-4">
-              <h3 className="text-xs font-black text-white/35 tracking-wider uppercase">Active TV Series Index</h3>
-              <div className="flex flex-col gap-3 max-h-[750px] overflow-y-auto custom-scrollbar pr-2">
-                {series.map((s) => (
-                  <div
-                    key={s.id}
-                    className="glass-panel p-4 rounded-2xl border border-white/5 flex items-center justify-between gap-4"
+              <div className="flex flex-col gap-1.5 text-left">
+                <h3 className="text-xs font-black text-white/35 tracking-wider uppercase">Active TV Series Index</h3>
+                <span className="text-[11px] text-white/50 font-medium leading-tight">
+                  With thousands of entries, type any TV show name to search, manage seasons, or remove.
+                </span>
+              </div>
+
+              {/* Local Search Input */}
+              <div className="relative">
+                <input
+                  type="text"
+                  value={localSeriesQuery}
+                  onChange={(e) => setLocalSeriesQuery(e.target.value)}
+                  placeholder="Type TV show name to manage..."
+                  className="w-full bg-apple-gray-800 text-white border border-white/10 rounded-xl pl-9 pr-8 py-2.5 text-xs font-bold focus:border-cyan-500/50 outline-none"
+                />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+                {localSeriesQuery && (
+                  <button
+                    type="button"
+                    onClick={() => setLocalSeriesQuery('')}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-white/40 hover:text-white font-bold cursor-pointer"
                   >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <img
-                        src={s.posterPath}
-                        alt=""
-                        className="w-10 h-14 rounded-lg object-cover flex-shrink-0"
-                      />
-                      <div className="min-w-0 text-left">
-                        <h4 className="text-xs sm:text-sm font-bold text-white truncate max-w-[130px]">{s.title}</h4>
-                        <p className="text-[10px] text-apple-gray-300 font-mono mt-0.5">{s.releaseYear} • {s.network}</p>
-                        <span className="inline-block px-1.5 py-0.5 rounded text-[8px] font-black bg-blue-500/10 text-blue-400 border border-blue-500/10 mt-1 uppercase">
-                          {s.seasons?.length || 0} Seasons
-                        </span>
+                    Clear
+                  </button>
+                )}
+              </div>
+
+              {/* List Indicator Badge */}
+              <div className="flex items-center justify-between px-1">
+                <span className="text-[10px] font-black uppercase text-cyan-400 font-mono tracking-wider">
+                  {localSeriesQuery.trim() === '' ? 'Recent Additions (first 10)' : `Matches (${filteredLocalSeries.length})`}
+                </span>
+                <span className="text-[10px] text-white/40 font-bold">
+                  Total: {series.length}
+                </span>
+              </div>
+
+              <div className="flex flex-col gap-3 max-h-[620px] overflow-y-auto custom-scrollbar pr-2">
+                {filteredLocalSeries.length === 0 ? (
+                  <div className="text-center py-12 text-white/30 text-xs border border-dashed border-white/5 rounded-2xl glass-panel">
+                    {localSeriesQuery.trim() === '' ? 'No TV shows recorded yet.' : 'No TV shows match your search query.'}
+                  </div>
+                ) : (
+                  filteredLocalSeries.map((s) => (
+                    <div
+                      key={s.id}
+                      className="glass-panel p-4 rounded-2xl border border-white/5 flex items-center justify-between gap-4"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <img
+                          src={s.posterPath}
+                          alt=""
+                          className="w-10 h-14 rounded-lg object-cover flex-shrink-0"
+                        />
+                        <div className="min-w-0 text-left">
+                          <h4 className="text-xs sm:text-sm font-bold text-white truncate max-w-[130px]">{s.title}</h4>
+                          <p className="text-[10px] text-apple-gray-300 font-mono mt-0.5">{s.releaseYear} • {s.network}</p>
+                          <span className="inline-block px-1.5 py-0.5 rounded text-[8px] font-black bg-blue-500/10 text-blue-400 border border-blue-500/10 mt-1 uppercase">
+                            {s.seasons?.length || 0} Seasons
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex gap-1.5 flex-shrink-0">
+                        <button
+                          onClick={() => handleEditSeriesClick(s)}
+                          className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-white/80 transition-colors cursor-pointer"
+                          title="Edit Details"
+                        >
+                          <Edit2 className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteSeriesClick(s.id, s.title)}
+                          className="p-2 rounded-lg bg-red-600/15 hover:bg-red-600 text-red-400 hover:text-white transition-colors cursor-pointer"
+                          title="Delete TV Show"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
                       </div>
                     </div>
-
-                    <div className="flex gap-1.5 flex-shrink-0">
-                      <button
-                        onClick={() => handleEditSeriesClick(s)}
-                        className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-white/80 transition-colors cursor-pointer"
-                        title="Edit Details"
-                      >
-                        <Edit2 className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteSeriesClick(s.id, s.title)}
-                        className="p-2 rounded-lg bg-red-600/15 hover:bg-red-600 text-red-400 hover:text-white transition-colors cursor-pointer"
-                        title="Delete TV Show"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </div>
 
