@@ -79,6 +79,12 @@ export interface Series {
   rating: number;
   seasons: Season[];
   addedAt: string; // ISO string
+  cast?: { id: string; name: string; character: string; profilePath: string | null }[];
+  director?: string;
+  writer?: string;
+  producer?: string;
+  studio?: string;
+  country?: string;
 }
 
 export interface HomeSection {

@@ -173,6 +173,17 @@ const SEED_SERIES: Series[] = [
     language: 'English',
     rating: 8.4,
     addedAt: '2026-07-01T13:00:00.000Z',
+    director: 'Ben Stiller, Aoife McArdle',
+    writer: 'Dan Erickson',
+    producer: 'Ben Stiller, Nicholas Weinstock',
+    studio: 'Red Hour Productions, Endeavor Content',
+    country: 'United States',
+    cast: [
+      { id: '125336', name: 'Adam Scott', character: 'Mark Scout', profilePath: 'https://image.tmdb.org/t/p/w500/8XvDBe668NfX8UAnYpT60667W7N.jpg' },
+      { id: '1158434', name: 'Britt Lower', character: 'Helly Riggs', profilePath: 'https://image.tmdb.org/t/p/w500/40Kby7bYhJv7CgD8iA32vYshZ3X.jpg' },
+      { id: '7243', name: 'Patricia Arquette', character: 'Harmony Cobel', profilePath: 'https://image.tmdb.org/t/p/w500/pXU0e2q9eW2X4k37G6qV4p1MlhP.jpg' },
+      { id: '10205', name: 'John Turturro', character: 'Irving Bailiff', profilePath: 'https://image.tmdb.org/t/p/w500/4yYmfeS3jEa43rQ4W0v7P6LgU3s.jpg' }
+    ],
     seasons: [
       {
         seasonNumber: 1,
@@ -201,6 +212,15 @@ const SEED_SERIES: Series[] = [
     language: 'English',
     rating: 8.6,
     addedAt: '2026-07-02T13:00:00.000Z',
+    director: 'Craig Mazin, Neil Druckmann',
+    writer: 'Craig Mazin, Neil Druckmann',
+    producer: 'Craig Mazin, Carolyn Strauss',
+    studio: 'PlayStation Productions, Naughty Dog',
+    country: 'United States',
+    cast: [
+      { id: '1253362', name: 'Pedro Pascal', character: 'Joel Miller', profilePath: 'https://image.tmdb.org/t/p/w500/dFxpwRpmzpVfP1zjluH68DeQhyj.jpg' },
+      { id: '1694203', name: 'Bella Ramsey', character: 'Ellie Williams', profilePath: 'https://image.tmdb.org/t/p/w500/6y7VshYFq9xH3Z6Xm10wJ9N1xP.jpg' }
+    ],
     seasons: [
       {
         seasonNumber: 1,

@@ -36,7 +36,8 @@ export default function Admin() {
   const [seriesForm, setSeriesForm] = useState<Partial<Series>>({
     title: '', originalTitle: '', tmdbId: '', customStory: '', subtitleType: 'Both',
     releaseYear: '', genres: [], posterPath: '', backdropPath: '', status: 'Returning Series',
-    network: 'Apple TV+', language: 'English', rating: 7.5, seasons: []
+    network: 'Apple TV+', language: 'English', rating: 7.5, seasons: [],
+    director: '', writer: '', producer: '', studio: '', country: '', cast: []
   });
   const [seriesSyncing, setSeriesSyncing] = useState(false);
   const [seriesStatusMsg, setSeriesStatusMsg] = useState('');
@@ -396,6 +397,12 @@ export default function Admin() {
         language: data.language || prev.language,
         rating: Number(data.rating.toFixed(1)) || prev.rating,
         seasons: data.seasons || prev.seasons,
+        director: data.director || prev.director,
+        writer: data.writer || prev.writer,
+        producer: data.producer || prev.producer,
+        studio: data.studio || prev.studio,
+        country: data.country || prev.country,
+        cast: data.cast || prev.cast,
       }));
       setSeriesStatusMsg('TMDB Sync Completed successfully!');
     } catch (err: any) {
@@ -429,6 +436,12 @@ export default function Admin() {
         language: data.language || 'English',
         rating: Number(data.rating.toFixed(1)) || 7.5,
         seasons: data.seasons || [],
+        director: data.director || 'Unknown',
+        writer: data.writer || 'Unknown',
+        producer: data.producer || 'Unknown',
+        studio: data.studio || 'Unknown',
+        country: data.country || 'Unknown',
+        cast: data.cast || [],
       }));
       setSeriesStatusMsg(`Prefilled details for "${data.title}" successfully!`);
     } catch (err: any) {
@@ -462,6 +475,12 @@ export default function Admin() {
       language: seriesForm.language || 'English',
       rating: Number(seriesForm.rating) || 7.5,
       seasons: seriesForm.seasons || [],
+      director: seriesForm.director || 'Unknown Director',
+      writer: seriesForm.writer || 'Unknown Writer',
+      producer: seriesForm.producer || 'Unknown Producer',
+      studio: seriesForm.studio || 'Unknown Studio',
+      country: seriesForm.country || 'Unknown',
+      cast: seriesForm.cast || [],
     };
 
     if (editingSeries) {
@@ -476,7 +495,8 @@ export default function Admin() {
     setSeriesForm({
       title: '', originalTitle: '', tmdbId: '', customStory: '', subtitleType: 'Both',
       releaseYear: '', genres: [], posterPath: '', backdropPath: '', status: 'Returning Series',
-      network: 'Apple TV+', language: 'English', rating: 7.5, seasons: []
+      network: 'Apple TV+', language: 'English', rating: 7.5, seasons: [],
+      director: '', writer: '', producer: '', studio: '', country: '', cast: []
     });
     setSeriesStatusMsg('');
     setEditorExpandedSeasonIdx(null);
@@ -1324,6 +1344,46 @@ export default function Admin() {
                       onChange={(e) => setSeriesForm(prev => ({ ...prev, genres: e.target.value.split(',').map(g => g.trim()) }))}
                       className="bg-apple-gray-800/60 text-white border border-white/5 rounded-lg px-3 py-2.5 text-xs font-semibold outline-none"
                     />
+                  </div>
+
+                  {/* Team specs */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[10px] font-black text-white/40 tracking-wider uppercase">Director</label>
+                      <input
+                        type="text"
+                        value={seriesForm.director || ''}
+                        onChange={(e) => setSeriesForm(prev => ({ ...prev, director: e.target.value }))}
+                        className="bg-apple-gray-800 text-white border border-white/10 rounded-lg p-2 text-xs font-bold"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[10px] font-black text-white/40 tracking-wider uppercase">Writer</label>
+                      <input
+                        type="text"
+                        value={seriesForm.writer || ''}
+                        onChange={(e) => setSeriesForm(prev => ({ ...prev, writer: e.target.value }))}
+                        className="bg-apple-gray-800 text-white border border-white/10 rounded-lg p-2 text-xs font-bold"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[10px] font-black text-white/40 tracking-wider uppercase">Studio</label>
+                      <input
+                        type="text"
+                        value={seriesForm.studio || ''}
+                        onChange={(e) => setSeriesForm(prev => ({ ...prev, studio: e.target.value }))}
+                        className="bg-apple-gray-800 text-white border border-white/10 rounded-lg p-2 text-xs font-bold"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[10px] font-black text-white/40 tracking-wider uppercase">Country</label>
+                      <input
+                        type="text"
+                        value={seriesForm.country || ''}
+                        onChange={(e) => setSeriesForm(prev => ({ ...prev, country: e.target.value }))}
+                        className="bg-apple-gray-800 text-white border border-white/10 rounded-lg p-2 text-xs font-bold"
+                      />
+                    </div>
                   </div>
 
                   {/* SEASONS & EPISODES NESTED EDITOR */}

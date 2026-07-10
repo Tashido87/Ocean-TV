@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { dbService } from '../services/db';
 import { Series } from '../types';
-import { Play, Heart, Star, Subtitles, Share2, Calendar, Clock, Globe, ArrowLeft, Tv, Layers, AlertCircle } from 'lucide-react';
+import { Play, Heart, Star, Subtitles, Share2, Calendar, Clock, Globe, ArrowLeft, Tv, Layers, AlertCircle, Users, Building } from 'lucide-react';
 import MovieCarousel from '../components/MovieCarousel';
 
 export default function SeriesDetail() {
@@ -198,6 +198,43 @@ export default function SeriesDetail() {
             </p>
           </div>
 
+          {/* Production & Crew Specs */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-white/2 p-6 rounded-2xl border border-white/5">
+            <div className="flex flex-col gap-1">
+              <span className="text-[10px] font-black text-white/40 tracking-wider uppercase flex items-center gap-1">
+                <Users className="w-3.5 h-3.5" /> Directing & Screenplay
+              </span>
+              <div className="text-sm font-bold text-white mt-1">
+                <span className="text-apple-gray-300 text-xs font-medium">Director / Creator:</span>{' '}
+                {series.director ? (
+                  <Link
+                    to={`/director/${encodeURIComponent(series.director)}`}
+                    className="text-cyan-400 hover:text-cyan-300 hover:underline transition-colors cursor-pointer"
+                  >
+                    {series.director}
+                  </Link>
+                ) : (
+                  'Unknown'
+                )}
+              </div>
+              <div className="text-sm font-bold text-white">
+                <span className="text-apple-gray-300 text-xs font-medium">Writer:</span> {series.writer || 'Unknown'}
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <span className="text-[10px] font-black text-white/40 tracking-wider uppercase flex items-center gap-1">
+                <Building className="w-3.5 h-3.5" /> Studio & Origins
+              </span>
+              <div className="text-sm font-bold text-white mt-1">
+                <span className="text-apple-gray-300 text-xs font-medium">Studio:</span> {series.studio || 'Unknown'}
+              </div>
+              <div className="text-sm font-bold text-white">
+                <span className="text-apple-gray-300 text-xs font-medium">Country:</span> {series.country || 'Unknown'}
+              </div>
+            </div>
+          </div>
+
           {/* Specs */}
           <div className="flex flex-wrap gap-2">
             {series.genres?.map(g => (
@@ -209,6 +246,41 @@ export default function SeriesDetail() {
 
         </div>
       </div>
+
+      {/* Cast Component Section */}
+      {series.cast && series.cast.length > 0 && (
+        <div className="max-w-7xl mx-auto px-6 md:px-12 mt-16 text-left">
+          <h2 className="font-sans font-semibold text-xl sm:text-2xl text-white mb-6 tracking-tight">
+            Cast & Characters
+          </h2>
+          <div className="flex gap-6 overflow-x-auto hide-scrollbar pb-4">
+            {series.cast.map((actor) => (
+              <Link
+                key={actor.id}
+                to={`/actor/${actor.id}`}
+                className="flex flex-col items-center gap-2 text-center group flex-shrink-0 w-28"
+              >
+                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden border border-white/5 bg-apple-gray-800 shadow-md group-hover:scale-105 group-hover:border-white/20 transition-all duration-300">
+                  <img
+                    src={actor.profilePath || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200'}
+                    alt={actor.name}
+                    referrerPolicy="no-referrer"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div>
+                  <h4 className="text-xs sm:text-sm font-bold text-white truncate max-w-[100px]">
+                    {actor.name}
+                  </h4>
+                  <p className="text-[10px] text-apple-gray-300 truncate max-w-[100px] mt-0.5">
+                    {actor.character}
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Seasons & Episodes Section */}
       {series.seasons && series.seasons.length > 0 && (

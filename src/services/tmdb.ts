@@ -136,6 +136,64 @@ export const tmdbService = {
 
       const genres = data.genres ? data.genres.map((g: any) => g.name) : [];
       
+      // Fetch series credits (cast & crew)
+      let cast: any[] = [];
+      let director = 'Unknown Director';
+      let writer = 'Unknown Writer';
+      let producer = 'Unknown Producer';
+
+      try {
+        const creditsResponse = await fetch(
+          `${BASE_URL}/tv/${tmdbId}/credits?api_key=${TMDB_API_KEY}`
+        );
+        if (creditsResponse.ok) {
+          const creditsData = await creditsResponse.json();
+          cast = (creditsData.cast || [])
+            .slice(0, 10)
+            .map((c: any) => ({
+              id: String(c.id),
+              name: c.name,
+              character: c.character || 'Unknown Character',
+              profilePath: c.profile_path ? getImageUrl(c.profile_path, 'w500') : null
+            }));
+
+          const directors = (creditsData.crew || [])
+            .filter((c: any) => c.job === 'Director' || c.job === 'Executive Producer' || c.job === 'Creator' || c.department === 'Directing')
+            .slice(0, 3)
+            .map((c: any) => c.name);
+          if (directors.length > 0) director = directors.join(', ');
+
+          const writers = (creditsData.crew || [])
+            .filter((c: any) => c.job === 'Writer' || c.job === 'Screenplay' || c.department === 'Writing')
+            .slice(0, 3)
+            .map((c: any) => c.name);
+          if (writers.length > 0) writer = writers.join(', ');
+
+          const producers = (creditsData.crew || [])
+            .filter((c: any) => c.job === 'Producer' || c.job === 'Executive Producer')
+            .slice(0, 3)
+            .map((c: any) => c.name);
+          if (producers.length > 0) producer = producers.join(', ');
+        }
+      } catch (err) {
+        console.error('Error fetching series credits:', err);
+      }
+
+      // Fallback for creators from main TV metadata
+      if (data.created_by && data.created_by.length > 0) {
+        const creators = data.created_by.map((c: any) => c.name).join(', ');
+        if (director === 'Unknown Director') director = creators;
+        if (writer === 'Unknown Writer') writer = creators;
+      }
+
+      const studio = data.production_companies && data.production_companies.length > 0
+        ? data.production_companies[0].name
+        : 'Unknown Studio';
+
+      const country = data.production_countries && data.production_countries.length > 0
+        ? data.production_countries[0].name
+        : (data.origin_country && data.origin_country.length > 0 ? data.origin_country[0] : 'Unknown');
+
       // We will also fetch specific details for the seasons to get episodes
       const seasonsData = [];
       const totalSeasons = Math.min(data.number_of_seasons || 1, 10); // cap at 10 seasons for simplicity
@@ -186,6 +244,12 @@ export const tmdbService = {
         language: data.languages && data.languages.length > 0 ? data.languages[0].toUpperCase() : 'EN',
         rating: data.vote_average || 0,
         seasons: seasonsData,
+        cast,
+        director,
+        writer,
+        producer,
+        studio,
+        country,
       };
     } catch (error) {
       console.error('Error fetching series details from TMDB:', error);
