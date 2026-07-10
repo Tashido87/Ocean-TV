@@ -5,7 +5,7 @@
 
 import { Movie, Series, HomeSection, Actor } from '../types';
 import { firestore } from './firebase';
-import { collection, doc, setDoc, deleteDoc, onSnapshot, getDocs } from 'firebase/firestore';
+import { collection, doc, setDoc, deleteDoc, onSnapshot, getDocs, getDoc } from 'firebase/firestore';
 
 // Let's create an elegant, curated list of seed movies and series.
 // All of these will have real TMDB IDs, custom human-written story summaries, and high-quality poster/backdrop URLs.
@@ -685,9 +685,18 @@ export const dbService = {
   },
 
   // --- FAVORITES ---
+  getFavoritesKey(): string {
+    const email = localStorage.getItem('cineapple_admin_email');
+    if (email) {
+      return `cineapple_favorites_${email.trim().toLowerCase().replace(/[^a-z0-9]/g, '_')}`;
+    }
+    return KEYS.FAVORITES;
+  },
+
   getFavorites(): string[] {
     try {
-      return JSON.parse(localStorage.getItem(KEYS.FAVORITES) || '[]');
+      const key = this.getFavoritesKey();
+      return JSON.parse(localStorage.getItem(key) || '[]');
     } catch {
       return [];
     }
@@ -707,10 +716,51 @@ export const dbService = {
     } else {
       favorites.splice(index, 1);
     }
-    localStorage.setItem(KEYS.FAVORITES, JSON.stringify(favorites));
+    const key = this.getFavoritesKey();
+    localStorage.setItem(key, JSON.stringify(favorites));
+
+    // Async Firestore sync if user is logged in
+    const email = localStorage.getItem('cineapple_admin_email');
+    if (email) {
+      const docRef = doc(firestore, 'favorites', email.trim().toLowerCase());
+      setDoc(docRef, { movieIds: favorites, updatedAt: new Date().toISOString() }).catch(console.error);
+    }
+
     window.dispatchEvent(new Event('storage'));
     window.dispatchEvent(new Event('database_updated'));
     return favorited;
+  },
+
+  clearFavorites(): void {
+    const key = this.getFavoritesKey();
+    localStorage.setItem(key, JSON.stringify([]));
+
+    const email = localStorage.getItem('cineapple_admin_email');
+    if (email) {
+      const docRef = doc(firestore, 'favorites', email.trim().toLowerCase());
+      setDoc(docRef, { movieIds: [], updatedAt: new Date().toISOString() }).catch(console.error);
+    }
+
+    window.dispatchEvent(new Event('storage'));
+    window.dispatchEvent(new Event('database_updated'));
+  },
+
+  async syncFavoritesFromFirestore(email: string): Promise<void> {
+    try {
+      const docRef = doc(firestore, 'favorites', email.trim().toLowerCase());
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        if (data && Array.isArray(data.movieIds)) {
+          const key = `cineapple_favorites_${email.trim().toLowerCase().replace(/[^a-z0-9]/g, '_')}`;
+          localStorage.setItem(key, JSON.stringify(data.movieIds));
+          window.dispatchEvent(new Event('storage'));
+          window.dispatchEvent(new Event('database_updated'));
+        }
+      }
+    } catch (err) {
+      console.error("Error syncing favorites from Firestore:", err);
+    }
   },
 
   // --- RECENTLY VIEWED ---
@@ -746,7 +796,9 @@ export const dbService = {
     if (pin === 'admin123' || pin === 'apple2026') {
       localStorage.setItem(KEYS.ADMIN_TOKEN, `admin_session_${Date.now()}`);
       localStorage.setItem('cineapple_admin_email', formattedEmail);
+      this.syncFavoritesFromFirestore(formattedEmail).catch(console.error);
       window.dispatchEvent(new Event('admin_auth_changed'));
+      window.dispatchEvent(new Event('database_updated'));
       return { success: true };
     }
     return { success: false, error: 'Incorrect passcode. Please try again.' };
@@ -758,3 +810,9 @@ export const dbService = {
     window.dispatchEvent(new Event('admin_auth_changed'));
   },
 };
+
+// Sync favorites if admin logged in on boot
+const adminEmail = localStorage.getItem('cineapple_admin_email');
+if (adminEmail) {
+  dbService.syncFavoritesFromFirestore(adminEmail).catch(console.error);
+}

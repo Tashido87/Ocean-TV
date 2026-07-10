@@ -237,6 +237,17 @@ export default function Admin() {
       setMovieStatusMsg('Please enter a TMDB ID first (e.g. 693134)');
       return;
     }
+
+    // Warning if duplicate
+    const allMovies = dbService.getMovies();
+    const isDuplicate = allMovies.some(m => {
+      if (editingMovie && m.id === editingMovie.id) return false;
+      return m.tmdbId && m.tmdbId === movieForm.tmdbId;
+    });
+    if (isDuplicate) {
+      alert(`Warning: A movie with TMDB ID "${movieForm.tmdbId}" is already in your library.`);
+    }
+
     setMovieSyncing(true);
     setMovieStatusMsg('Querying TMDB endpoints...');
     try {
@@ -270,6 +281,16 @@ export default function Admin() {
   };
 
   const handleSelectMovieResult = async (item: any) => {
+    // Check if duplicate FIRST to avoid unnecessary fetches or duplicate creation
+    const allMovies = dbService.getMovies();
+    const isDuplicate = allMovies.some(m => String(m.tmdbId) === String(item.id));
+    if (isDuplicate) {
+      alert(`Note: The movie "${item.title}" (TMDB ID: ${item.id}) is already in your database!`);
+      setShowMovieDropdown(false);
+      setMovieSearchQuery('');
+      return;
+    }
+
     setShowMovieDropdown(false);
     setMovieSearchQuery('');
     setMovieSyncing(true);
@@ -339,6 +360,22 @@ export default function Admin() {
       cast: movieForm.cast || [],
     };
 
+    // Check for duplicates
+    const allMovies = dbService.getMovies();
+    const isDuplicate = allMovies.some(m => {
+      if (editingMovie && m.id === editingMovie.id) return false;
+      const hasRealTmdbId = m.tmdbId && payload.tmdbId && !m.tmdbId.startsWith('movie-') && m.tmdbId.length < 15 && payload.tmdbId.length < 15;
+      const sameTmdb = hasRealTmdbId && m.tmdbId === payload.tmdbId;
+      const sameTitleAndYear = m.title.trim().toLowerCase() === payload.title.trim().toLowerCase() && 
+                               m.releaseYear === payload.releaseYear;
+      return sameTmdb || sameTitleAndYear;
+    });
+
+    if (isDuplicate) {
+      alert(`Duplicate Error: A movie with the title "${payload.title}" (${payload.releaseYear || 'N/A'}) or TMDB ID "${payload.tmdbId}" already exists in the library!`);
+      return;
+    }
+
     if (editingMovie) {
       dbService.updateMovie(editingMovie.id!, payload);
       triggerSuccessBanner(`Successfully updated movie: ${payload.title}`);
@@ -380,6 +417,17 @@ export default function Admin() {
       setSeriesStatusMsg('Please enter a TMDB ID first (e.g. 95396)');
       return;
     }
+
+    // Warning if duplicate
+    const allSeries = dbService.getSeries();
+    const isDuplicate = allSeries.some(s => {
+      if (editingSeries && s.id === editingSeries.id) return false;
+      return s.tmdbId && s.tmdbId === seriesForm.tmdbId;
+    });
+    if (isDuplicate) {
+      alert(`Warning: A TV Series with TMDB ID "${seriesForm.tmdbId}" is already in your library.`);
+    }
+
     setSeriesSyncing(true);
     setSeriesStatusMsg('Querying TMDB endpoints...');
     try {
@@ -414,6 +462,16 @@ export default function Admin() {
   };
 
   const handleSelectSeriesResult = async (item: any) => {
+    // Check if duplicate FIRST to avoid unnecessary fetches or duplicate creation
+    const allSeries = dbService.getSeries();
+    const isDuplicate = allSeries.some(s => String(s.tmdbId) === String(item.id));
+    if (isDuplicate) {
+      alert(`Note: The TV Series "${item.name || item.title}" (TMDB ID: ${item.id}) is already in your database!`);
+      setShowSeriesDropdown(false);
+      setSeriesSearchQuery('');
+      return;
+    }
+
     setShowSeriesDropdown(false);
     setSeriesSearchQuery('');
     setSeriesSyncing(true);
@@ -482,6 +540,22 @@ export default function Admin() {
       country: seriesForm.country || 'Unknown',
       cast: seriesForm.cast || [],
     };
+
+    // Check for duplicates
+    const allSeries = dbService.getSeries();
+    const isDuplicate = allSeries.some(s => {
+      if (editingSeries && s.id === editingSeries.id) return false;
+      const hasRealTmdbId = s.tmdbId && payload.tmdbId && !s.tmdbId.startsWith('series-') && s.tmdbId.length < 15 && payload.tmdbId.length < 15;
+      const sameTmdb = hasRealTmdbId && s.tmdbId === payload.tmdbId;
+      const sameTitleAndYear = s.title.trim().toLowerCase() === payload.title.trim().toLowerCase() && 
+                               s.releaseYear === payload.releaseYear;
+      return sameTmdb || sameTitleAndYear;
+    });
+
+    if (isDuplicate) {
+      alert(`Duplicate Error: A TV Series with the title "${payload.title}" (${payload.releaseYear || 'N/A'}) or TMDB ID "${payload.tmdbId}" already exists in the library!`);
+      return;
+    }
 
     if (editingSeries) {
       dbService.updateSeries(editingSeries.id!, payload);

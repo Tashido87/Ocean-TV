@@ -59,8 +59,7 @@ export default function Favorites() {
   };
 
   const handleClearFavorites = () => {
-    localStorage.setItem('cineapple_favorites', JSON.stringify([]));
-    setFavorites([]);
+    dbService.clearFavorites();
   };
 
   const handleClearRecent = () => {
