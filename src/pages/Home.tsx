@@ -45,7 +45,11 @@ export default function Home() {
       loadData();
     };
     window.addEventListener('storage', handleStorageUpdate);
-    return () => window.removeEventListener('storage', handleStorageUpdate);
+    window.addEventListener('database_updated', handleStorageUpdate);
+    return () => {
+      window.removeEventListener('storage', handleStorageUpdate);
+      window.removeEventListener('database_updated', handleStorageUpdate);
+    };
   }, []);
 
   // Resolves the list of movies/series for a specific section
@@ -84,7 +88,7 @@ export default function Home() {
   };
 
   return (
-    <div className="w-full bg-apple-gray-900 pb-20">
+    <div className="w-full bg-apple-gray-900 pb-6">
       {/* Cinematic Hero Slider */}
       {heroMovies.length > 0 && <HeroCarousel movies={heroMovies} />}
 

@@ -3,12 +3,28 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Waves } from 'lucide-react';
+import { dbService } from '../services/db';
 
 export default function Footer() {
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const checkAdmin = () => {
+      setIsAdmin(dbService.isAdminLoggedIn());
+    };
+    checkAdmin();
+
+    window.addEventListener('admin_auth_changed', checkAdmin);
+    return () => {
+      window.removeEventListener('admin_auth_changed', checkAdmin);
+    };
+  }, []);
+
   return (
-    <footer className="border-t border-white/5 bg-apple-gray-900 py-12 px-6 md:px-12 mt-16 text-sm text-apple-gray-300">
+    <footer className="border-t border-white/5 bg-apple-gray-900 py-6 px-6 md:px-12 mt-6 text-sm text-apple-gray-300">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 rounded-md bg-gradient-to-tr from-blue-600 to-cyan-400 text-white flex items-center justify-center">
@@ -28,7 +44,9 @@ export default function Footer() {
           <Link to="/series" className="hover:text-white transition-colors duration-200">TV Shows</Link>
           <Link to="/search" className="hover:text-white transition-colors duration-200">Search</Link>
           <Link to="/favorites" className="hover:text-white transition-colors duration-200">My Favorites</Link>
-          <Link to="/admin" className="hover:text-white transition-colors duration-200 text-red-400/80 hover:text-red-400">Admin Control</Link>
+          {isAdmin && (
+            <Link to="/admin" className="hover:text-white transition-colors duration-200 text-red-400/80 hover:text-red-400">Admin Control</Link>
+          )}
         </div>
 
         <div className="text-center md:text-right text-xs text-apple-gray-400">

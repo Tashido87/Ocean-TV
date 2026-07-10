@@ -4,6 +4,8 @@
  */
 
 import { Movie, Series, HomeSection, Actor } from '../types';
+import { firestore } from './firebase';
+import { collection, doc, setDoc, deleteDoc, onSnapshot, getDocs } from 'firebase/firestore';
 
 // Let's create an elegant, curated list of seed movies and series.
 // All of these will have real TMDB IDs, custom human-written story summaries, and high-quality poster/backdrop URLs.
@@ -232,7 +234,7 @@ const KEYS = {
 };
 
 // Initialize DB with automatic schema and image repair migration
-const initDatabase = () => {
+const initDatabase = async () => {
   let existingMovies: Movie[] = [];
   try {
     existingMovies = JSON.parse(localStorage.getItem(KEYS.MOVIES) || '[]');
@@ -298,6 +300,79 @@ const initDatabase = () => {
   if (!localStorage.getItem(KEYS.RECENTLY_VIEWED)) {
     localStorage.setItem(KEYS.RECENTLY_VIEWED, JSON.stringify([]));
   }
+
+  // 2. Synchronize up to Firestore if Firestore is empty
+  try {
+    const moviesColl = collection(firestore, 'movies');
+    const moviesSnap = await getDocs(moviesColl);
+    if (moviesSnap.empty) {
+      console.log('Seeding movies to Firestore from local database...');
+      const localMoviesList: Movie[] = JSON.parse(localStorage.getItem(KEYS.MOVIES) || '[]');
+      for (const movie of localMoviesList) {
+        await setDoc(doc(firestore, 'movies', movie.id), movie);
+      }
+    }
+
+    const seriesColl = collection(firestore, 'series');
+    const seriesSnap = await getDocs(seriesColl);
+    if (seriesSnap.empty) {
+      console.log('Seeding series to Firestore from local database...');
+      const localSeriesList: Series[] = JSON.parse(localStorage.getItem(KEYS.SERIES) || '[]');
+      for (const s of localSeriesList) {
+        await setDoc(doc(firestore, 'series', s.id), s);
+      }
+    }
+
+    const sectionsColl = collection(firestore, 'home_sections');
+    const sectionsSnap = await getDocs(sectionsColl);
+    if (sectionsSnap.empty) {
+      console.log('Seeding sections to Firestore from local database...');
+      const localSectionsList: HomeSection[] = JSON.parse(localStorage.getItem(KEYS.SECTIONS) || '[]');
+      for (const s of localSectionsList) {
+        await setDoc(doc(firestore, 'home_sections', s.id), s);
+      }
+    }
+  } catch (err) {
+    console.error('Error migrating/seeding data to Firestore:', err);
+  }
+
+  // 3. Register real-time listener snapshots from Firestore to local storage
+  onSnapshot(collection(firestore, 'movies'), (snapshot) => {
+    const list: Movie[] = [];
+    snapshot.forEach((docSnap) => {
+      list.push(docSnap.data() as Movie);
+    });
+    if (list.length > 0) {
+      localStorage.setItem(KEYS.MOVIES, JSON.stringify(list));
+      window.dispatchEvent(new Event('storage'));
+      window.dispatchEvent(new Event('database_updated'));
+    }
+  });
+
+  onSnapshot(collection(firestore, 'series'), (snapshot) => {
+    const list: Series[] = [];
+    snapshot.forEach((docSnap) => {
+      list.push(docSnap.data() as Series);
+    });
+    if (list.length > 0) {
+      localStorage.setItem(KEYS.SERIES, JSON.stringify(list));
+      window.dispatchEvent(new Event('storage'));
+      window.dispatchEvent(new Event('database_updated'));
+    }
+  });
+
+  onSnapshot(collection(firestore, 'home_sections'), (snapshot) => {
+    const list: HomeSection[] = [];
+    snapshot.forEach((docSnap) => {
+      list.push(docSnap.data() as HomeSection);
+    });
+    if (list.length > 0) {
+      list.sort((a, b) => a.order - b.order);
+      localStorage.setItem(KEYS.SECTIONS, JSON.stringify(list));
+      window.dispatchEvent(new Event('storage'));
+      window.dispatchEvent(new Event('database_updated'));
+    }
+  });
 };
 
 initDatabase();
@@ -317,14 +392,22 @@ export const dbService = {
   },
 
   addMovie(movie: Omit<Movie, 'id' | 'addedAt'> & { id?: string }): Movie {
-    const movies = this.getMovies();
+    const id = movie.id || `movie-${Date.now()}`;
     const newMovie: Movie = {
       ...movie,
-      id: movie.id || `movie-${Date.now()}`,
+      id,
       addedAt: new Date().toISOString(),
     };
+    
+    // Save asynchronously to Firestore
+    setDoc(doc(firestore, 'movies', id), newMovie).catch(console.error);
+
+    // Save synchronously to local storage for instant reactivity
+    const movies = this.getMovies().filter(m => m.id !== id);
     movies.push(newMovie);
     localStorage.setItem(KEYS.MOVIES, JSON.stringify(movies));
+    window.dispatchEvent(new Event('storage'));
+    window.dispatchEvent(new Event('database_updated'));
     return newMovie;
   },
 
@@ -333,15 +416,29 @@ export const dbService = {
     const index = movies.findIndex(m => m.id === id);
     if (index === -1) throw new Error(`Movie with ID ${id} not found`);
     
-    movies[index] = { ...movies[index], ...updatedMovie };
+    const merged = { ...movies[index], ...updatedMovie };
+    
+    // Save asynchronously to Firestore
+    setDoc(doc(firestore, 'movies', id), merged).catch(console.error);
+
+    // Save synchronously to local storage for instant reactivity
+    movies[index] = merged;
     localStorage.setItem(KEYS.MOVIES, JSON.stringify(movies));
-    return movies[index];
+    window.dispatchEvent(new Event('storage'));
+    window.dispatchEvent(new Event('database_updated'));
+    return merged;
   },
 
   deleteMovie(id: string): void {
+    // Delete from Firestore
+    deleteDoc(doc(firestore, 'movies', id)).catch(console.error);
+
+    // Delete from localStorage
     const movies = this.getMovies();
     const filtered = movies.filter(m => m.id !== id);
     localStorage.setItem(KEYS.MOVIES, JSON.stringify(filtered));
+    window.dispatchEvent(new Event('storage'));
+    window.dispatchEvent(new Event('database_updated'));
   },
 
   // --- SERIES ---
@@ -358,14 +455,22 @@ export const dbService = {
   },
 
   addSeries(series: Omit<Series, 'id' | 'addedAt'> & { id?: string }): Series {
-    const allSeries = this.getSeries();
+    const id = series.id || `series-${Date.now()}`;
     const newSeries: Series = {
       ...series,
-      id: series.id || `series-${Date.now()}`,
+      id,
       addedAt: new Date().toISOString(),
     };
+
+    // Save asynchronously to Firestore
+    setDoc(doc(firestore, 'series', id), newSeries).catch(console.error);
+
+    // Save synchronously to local storage for instant reactivity
+    const allSeries = this.getSeries().filter(s => s.id !== id);
     allSeries.push(newSeries);
     localStorage.setItem(KEYS.SERIES, JSON.stringify(allSeries));
+    window.dispatchEvent(new Event('storage'));
+    window.dispatchEvent(new Event('database_updated'));
     return newSeries;
   },
 
@@ -374,15 +479,29 @@ export const dbService = {
     const index = allSeries.findIndex(s => s.id === id);
     if (index === -1) throw new Error(`Series with ID ${id} not found`);
     
-    allSeries[index] = { ...allSeries[index], ...updatedSeries };
+    const merged = { ...allSeries[index], ...updatedSeries };
+
+    // Save asynchronously to Firestore
+    setDoc(doc(firestore, 'series', id), merged).catch(console.error);
+
+    // Save synchronously to local storage for instant reactivity
+    allSeries[index] = merged;
     localStorage.setItem(KEYS.SERIES, JSON.stringify(allSeries));
-    return allSeries[index];
+    window.dispatchEvent(new Event('storage'));
+    window.dispatchEvent(new Event('database_updated'));
+    return merged;
   },
 
   deleteSeries(id: string): void {
+    // Delete from Firestore
+    deleteDoc(doc(firestore, 'series', id)).catch(console.error);
+
+    // Delete from localStorage
     const allSeries = this.getSeries();
     const filtered = allSeries.filter(s => s.id !== id);
     localStorage.setItem(KEYS.SERIES, JSON.stringify(filtered));
+    window.dispatchEvent(new Event('storage'));
+    window.dispatchEvent(new Event('database_updated'));
   },
 
   // --- HOME SECTIONS ---
@@ -400,30 +519,59 @@ export const dbService = {
     const index = sections.findIndex(s => s.id === id);
     if (index === -1) throw new Error(`Section with ID ${id} not found`);
     
-    sections[index] = { ...sections[index], ...updated };
+    const merged = { ...sections[index], ...updated };
+
+    // Save asynchronously to Firestore
+    setDoc(doc(firestore, 'home_sections', id), merged).catch(console.error);
+
+    // Save synchronously to local storage for instant reactivity
+    sections[index] = merged;
     localStorage.setItem(KEYS.SECTIONS, JSON.stringify(sections));
-    return sections[index];
+    window.dispatchEvent(new Event('storage'));
+    window.dispatchEvent(new Event('database_updated'));
+    return merged;
   },
 
   saveHomeSections(sections: HomeSection[]): void {
+    // Save each to Firestore
+    for (const section of sections) {
+      setDoc(doc(firestore, 'home_sections', section.id), section).catch(console.error);
+    }
+    // Save to localStorage
     localStorage.setItem(KEYS.SECTIONS, JSON.stringify(sections));
+    window.dispatchEvent(new Event('storage'));
+    window.dispatchEvent(new Event('database_updated'));
   },
 
   addHomeSection(section: Omit<HomeSection, 'id'>): HomeSection {
-    const sections = this.getHomeSections();
+    const id = `section-${Date.now()}`;
     const newSection: HomeSection = {
       ...section,
-      id: `section-${Date.now()}`,
+      id,
     };
+
+    // Save asynchronously to Firestore
+    setDoc(doc(firestore, 'home_sections', id), newSection).catch(console.error);
+
+    // Save synchronously to local storage for instant reactivity
+    const sections = this.getHomeSections();
     sections.push(newSection);
     localStorage.setItem(KEYS.SECTIONS, JSON.stringify(sections));
+    window.dispatchEvent(new Event('storage'));
+    window.dispatchEvent(new Event('database_updated'));
     return newSection;
   },
 
   deleteHomeSection(id: string): void {
+    // Delete from Firestore
+    deleteDoc(doc(firestore, 'home_sections', id)).catch(console.error);
+
+    // Delete from localStorage
     const sections = this.getHomeSections();
     const filtered = sections.filter(s => s.id !== id);
     localStorage.setItem(KEYS.SECTIONS, JSON.stringify(filtered));
+    window.dispatchEvent(new Event('storage'));
+    window.dispatchEvent(new Event('database_updated'));
   },
 
   // --- FAVORITES ---
@@ -450,6 +598,8 @@ export const dbService = {
       favorites.splice(index, 1);
     }
     localStorage.setItem(KEYS.FAVORITES, JSON.stringify(favorites));
+    window.dispatchEvent(new Event('storage'));
+    window.dispatchEvent(new Event('database_updated'));
     return favorited;
   },
 
@@ -468,6 +618,8 @@ export const dbService = {
     recent.unshift(id);
     recent = recent.slice(0, 10); // cap at 10 items
     localStorage.setItem(KEYS.RECENTLY_VIEWED, JSON.stringify(recent));
+    window.dispatchEvent(new Event('storage'));
+    window.dispatchEvent(new Event('database_updated'));
   },
 
   // --- ADMIN AUTH (Perfect Firebase Auth simulations for Netlify/standalone compatibility) ---
@@ -481,6 +633,7 @@ export const dbService = {
     }
     if (pin === 'admin123' || pin === 'apple2026') {
       localStorage.setItem(KEYS.ADMIN_TOKEN, `admin_session_${Date.now()}`);
+      window.dispatchEvent(new Event('admin_auth_changed'));
       return { success: true };
     }
     return { success: false, error: 'Incorrect passcode. Please try again.' };
@@ -488,5 +641,6 @@ export const dbService = {
 
   logoutAdmin(): void {
     localStorage.removeItem(KEYS.ADMIN_TOKEN);
+    window.dispatchEvent(new Event('admin_auth_changed'));
   },
 };

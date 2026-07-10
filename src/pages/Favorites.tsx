@@ -16,6 +16,13 @@ export default function Favorites() {
   useEffect(() => {
     window.scrollTo(0, 0);
     loadData();
+
+    window.addEventListener('storage', loadData);
+    window.addEventListener('database_updated', loadData);
+    return () => {
+      window.removeEventListener('storage', loadData);
+      window.removeEventListener('database_updated', loadData);
+    };
   }, []);
 
   const loadData = () => {
@@ -62,7 +69,7 @@ export default function Favorites() {
   };
 
   return (
-    <div className="w-full bg-apple-gray-900 min-h-screen pt-28 pb-20 px-6 md:px-12">
+    <div className="w-full bg-apple-gray-900 min-h-screen pt-28 pb-8 px-6 md:px-12">
       <div className="max-w-7xl mx-auto flex flex-col gap-12 text-left">
         
         {/* FAVORITES BLOCK */}

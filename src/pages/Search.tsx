@@ -21,8 +21,18 @@ export default function SearchPage() {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    setLocalMovies(dbService.getMovies());
-    setLocalSeries(dbService.getSeries());
+    const loadData = () => {
+      setLocalMovies(dbService.getMovies());
+      setLocalSeries(dbService.getSeries());
+    };
+    loadData();
+
+    window.addEventListener('storage', loadData);
+    window.addEventListener('database_updated', loadData);
+    return () => {
+      window.removeEventListener('storage', loadData);
+      window.removeEventListener('database_updated', loadData);
+    };
   }, []);
 
   // Fetch live autocomplete suggestions from TMDB as the user types (debounced)
@@ -83,7 +93,7 @@ export default function SearchPage() {
     tmdbActors.length > 0;
 
   return (
-    <div className="w-full bg-apple-gray-900 min-h-screen pt-28 pb-20 px-6 md:px-12">
+    <div className="w-full bg-apple-gray-900 min-h-screen pt-28 pb-8 px-6 md:px-12">
       <div className="max-w-7xl mx-auto flex flex-col gap-8 text-left">
         
         {/* Page Header */}

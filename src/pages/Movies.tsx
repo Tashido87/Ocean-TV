@@ -20,7 +20,17 @@ export default function Movies() {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    setMovies(dbService.getMovies());
+    const loadData = () => {
+      setMovies(dbService.getMovies());
+    };
+    loadData();
+
+    window.addEventListener('storage', loadData);
+    window.addEventListener('database_updated', loadData);
+    return () => {
+      window.removeEventListener('storage', loadData);
+      window.removeEventListener('database_updated', loadData);
+    };
   }, []);
 
   // Extract unique genres, years, and languages for filtering options
@@ -113,7 +123,7 @@ export default function Movies() {
   }, [movies, searchTerm, selectedGenre, selectedYear, selectedRating, selectedLanguage, sortBy]);
 
   return (
-    <div className="w-full bg-apple-gray-900 min-h-screen pt-28 pb-20 px-6 md:px-12">
+    <div className="w-full bg-apple-gray-900 min-h-screen pt-28 pb-8 px-6 md:px-12">
       <div className="max-w-7xl mx-auto flex flex-col gap-8">
         
         {/* Page Title Header */}

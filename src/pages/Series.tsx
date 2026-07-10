@@ -20,7 +20,17 @@ export default function SeriesPage() {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    setSeries(dbService.getSeries());
+    const loadData = () => {
+      setSeries(dbService.getSeries());
+    };
+    loadData();
+
+    window.addEventListener('storage', loadData);
+    window.addEventListener('database_updated', loadData);
+    return () => {
+      window.removeEventListener('storage', loadData);
+      window.removeEventListener('database_updated', loadData);
+    };
   }, []);
 
   // Extract filters
@@ -108,7 +118,7 @@ export default function SeriesPage() {
   }, [series, searchTerm, selectedGenre, selectedYear, selectedRating, selectedNetwork, sortBy]);
 
   return (
-    <div className="w-full bg-apple-gray-900 min-h-screen pt-28 pb-20 px-6 md:px-12">
+    <div className="w-full bg-apple-gray-900 min-h-screen pt-28 pb-8 px-6 md:px-12">
       <div className="max-w-7xl mx-auto flex flex-col gap-8">
         
         {/* Page Title Header */}
