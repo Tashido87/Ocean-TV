@@ -672,6 +672,13 @@ export default function Admin() {
         (s.originalTitle && s.originalTitle.toLowerCase().includes(localSeriesQuery.toLowerCase()))
       );
 
+  const dbLanguages = [
+    ...movies.map(m => m.language).filter(Boolean),
+    ...series.map(s => s.language).filter(Boolean)
+  ];
+  const uniqueDbLanguages = Array.from(new Set(dbLanguages)).sort();
+  const availableLanguages = uniqueDbLanguages.length > 0 ? uniqueDbLanguages : ['English', 'Korean', 'Japanese', 'Thai', 'Chinese', 'Spanish'];
+
   return (
     <div className="w-full bg-apple-gray-900 min-h-screen pt-28 pb-20 px-6 md:px-12">
       <div className="max-w-7xl mx-auto flex flex-col gap-8 text-left">
@@ -1871,8 +1878,22 @@ export default function Admin() {
                     <label className="text-[9px] font-black text-white/40 uppercase">Source Rule Category</label>
                     <select
                       value={newSectionListType}
-                      onChange={(e: any) => setNewSectionListType(e.target.value)}
-                      className="bg-apple-gray-800 text-white border border-white/10 rounded-lg p-2 text-xs font-bold"
+                      onChange={(e: any) => {
+                        const val = e.target.value;
+                        setNewSectionListType(val);
+                        if (val === 'language') {
+                          // set default language value from computed db list if available
+                          const dbLangs = [
+                            ...movies.map(m => m.language).filter(Boolean),
+                            ...series.map(s => s.language).filter(Boolean)
+                          ];
+                          const uniqueLangs = Array.from(new Set(dbLangs)).sort();
+                          setNewSectionVal(uniqueLangs[0] || 'English');
+                        } else {
+                          setNewSectionVal('');
+                        }
+                      }}
+                      className="bg-apple-gray-800 text-white border border-white/10 rounded-lg p-2 text-xs font-bold font-sans outline-none"
                     >
                       <option value="trending">Trending (Highest Rated)</option>
                       <option value="popular">Popular (Rating &ge; 7.5)</option>
@@ -1888,16 +1909,30 @@ export default function Admin() {
                   {(newSectionListType === 'genre' || newSectionListType === 'language' || newSectionListType === 'custom') && (
                     <div className="flex flex-col gap-1">
                       <label className="text-[9px] font-black text-white/40 uppercase">
-                        {newSectionListType === 'genre' ? 'Genre name' : newSectionListType === 'language' ? 'Language name' : 'Comma-separated IDs'}
+                        {newSectionListType === 'genre' ? 'Genre name' : newSectionListType === 'language' ? 'Choose Language' : 'Comma-separated IDs'}
                       </label>
-                      <input
-                        type="text"
-                        value={newSectionVal}
-                        onChange={(e) => setNewSectionVal(e.target.value)}
-                        placeholder={newSectionListType === 'genre' ? 'e.g. Sci-Fi' : newSectionListType === 'language' ? 'e.g. Korean' : 'e.g. dune-2, inter-1'}
-                        className="bg-apple-gray-800 text-white border border-white/10 rounded-lg p-2.5 text-xs font-semibold outline-none"
-                        required
-                      />
+                      {newSectionListType === 'language' ? (
+                        <select
+                          value={newSectionVal}
+                          onChange={(e) => setNewSectionVal(e.target.value)}
+                          className="bg-apple-gray-800 text-white border border-white/10 rounded-lg p-2.5 text-xs font-semibold outline-none"
+                          required
+                        >
+                          <option value="" disabled>-- Select Language --</option>
+                          {availableLanguages.map((lang) => (
+                            <option key={lang} value={lang}>{lang}</option>
+                          ))}
+                        </select>
+                      ) : (
+                        <input
+                          type="text"
+                          value={newSectionVal}
+                          onChange={(e) => setNewSectionVal(e.target.value)}
+                          placeholder={newSectionListType === 'genre' ? 'e.g. Sci-Fi' : 'e.g. dune-2, inter-1'}
+                          className="bg-apple-gray-800 text-white border border-white/10 rounded-lg p-2.5 text-xs font-semibold outline-none"
+                          required
+                        />
+                      )}
                     </div>
                   )}
 
