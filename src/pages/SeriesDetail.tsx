@@ -10,6 +10,47 @@ import { Series } from '../types';
 import { Play, Heart, Star, Subtitles, Share2, Calendar, Clock, Globe, ArrowLeft, Tv, Layers, AlertCircle, Users, Building } from 'lucide-react';
 import MovieCarousel from '../components/MovieCarousel';
 
+// Helper Sub-component for Cast Avatars with initials fallback on error
+function CastAvatar({ name, profilePath }: { name: string; profilePath: string | null }) {
+  const [imageError, setImageError] = useState(false);
+
+  const getInitials = (fullName: string) => {
+    if (!fullName) return '?';
+    const parts = fullName.trim().split(/\s+/);
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  };
+
+  if (!profilePath || imageError) {
+    const initials = getInitials(name);
+    const gradients = [
+      'from-slate-700 to-slate-800',
+      'from-zinc-700 to-zinc-800',
+      'from-neutral-700 to-neutral-800',
+      'from-stone-700 to-stone-800',
+      'from-gray-700 to-gray-800',
+    ];
+    const index = name.charCodeAt(0) % gradients.length;
+    const gradientClass = gradients[index];
+
+    return (
+      <div className={`w-full h-full flex items-center justify-center bg-gradient-to-br ${gradientClass} text-white font-black text-sm tracking-wider uppercase`}>
+        {initials}
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={profilePath}
+      alt={name}
+      referrerPolicy="no-referrer"
+      onError={() => setImageError(true)}
+      className="w-full h-full object-cover"
+    />
+  );
+}
+
 export default function SeriesDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -163,8 +204,21 @@ export default function SeriesDetail() {
           {/* Subtitle Matrix Row */}
           <div className="flex flex-wrap items-center gap-4">
             <div className="px-5 py-2.5 rounded-xl bg-white/10 backdrop-blur-md border border-white/10 flex items-center gap-2 text-sm font-bold text-white shadow-md">
-              <Subtitles className="w-4.5 h-4.5 text-emerald-400" />
-              <span>Myanmar & Eng Subs Available</span>
+              <Subtitles className={`w-4.5 h-4.5 ${
+                series.subtitleType === 'Myanmar' 
+                  ? 'text-amber-400' 
+                  : series.subtitleType === 'English' 
+                  ? 'text-blue-400' 
+                  : series.subtitleType === 'Both'
+                  ? 'text-emerald-400'
+                  : 'text-red-400'
+              }`} />
+              <span>
+                {series.subtitleType === 'Myanmar' && 'Myanmar Subs Available'}
+                {series.subtitleType === 'English' && 'English Subs Available'}
+                {series.subtitleType === 'Both' && 'Myanmar & Eng Subs Available'}
+                {(!series.subtitleType || series.subtitleType === 'None') && 'No Subs Available'}
+              </span>
             </div>
 
             <button
@@ -261,12 +315,7 @@ export default function SeriesDetail() {
                 className="flex flex-col items-center gap-2 text-center group flex-shrink-0 w-28"
               >
                 <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden border border-white/5 bg-apple-gray-800 shadow-md group-hover:scale-105 group-hover:border-white/20 transition-all duration-300">
-                  <img
-                    src={actor.profilePath || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200'}
-                    alt={actor.name}
-                    referrerPolicy="no-referrer"
-                    className="w-full h-full object-cover"
-                  />
+                  <CastAvatar name={actor.name} profilePath={actor.profilePath} />
                 </div>
                 <div>
                   <h4 className="text-xs sm:text-sm font-bold text-white truncate max-w-[100px]">

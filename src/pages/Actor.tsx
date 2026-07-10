@@ -18,6 +18,7 @@ export default function ActorPage() {
   const [localSeries, setLocalSeries] = useState<Series[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
     // Load local database items for filtering
@@ -28,6 +29,7 @@ export default function ActorPage() {
   useEffect(() => {
     if (!id) return;
     window.scrollTo(0, 0);
+    setImageError(false);
 
     const loadActor = async () => {
       setLoading(true);
@@ -105,11 +107,12 @@ export default function ActorPage() {
         <div className="glass-panel p-6 sm:p-10 rounded-3xl border border-white/8 flex flex-col md:flex-row gap-8 sm:gap-12 items-start text-left shadow-2xl">
           {/* Large circular profile picture */}
           <div className="w-36 h-36 sm:w-48 sm:h-48 md:w-56 md:h-56 rounded-full overflow-hidden border-2 border-white/10 bg-apple-gray-800 flex-shrink-0 mx-auto md:mx-0 shadow-lg">
-            {actor.profilePath ? (
+            {actor.profilePath && !imageError ? (
               <img
                 src={actor.profilePath}
                 alt={actor.name}
                 referrerPolicy="no-referrer"
+                onError={() => setImageError(true)}
                 className="w-full h-full object-cover"
               />
             ) : (

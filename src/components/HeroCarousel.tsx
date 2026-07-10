@@ -118,7 +118,7 @@ export default function HeroCarousel({ movies }: HeroCarouselProps) {
           </h1>
 
           {/* Short Description */}
-          <p className="font-sans text-sm sm:text-base md:text-lg text-apple-gray-200/90 leading-relaxed max-w-2xl line-clamp-3 sm:line-clamp-none drop-shadow">
+          <p className="font-sans text-sm sm:text-base md:text-lg text-apple-gray-200/90 leading-relaxed max-w-2xl line-clamp-4 drop-shadow">
             {currentMovie.customStory}
           </p>
 
