@@ -58,10 +58,7 @@ export default function Navigation() {
     >
       <div className="max-w-7xl mx-auto px-6 md:px-12 flex items-center justify-between">
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2.5 group">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-blue-600 to-cyan-400 text-white flex items-center justify-center shadow-lg group-hover:scale-105 transition-all duration-300">
-            <Waves className="w-4.5 h-4.5" />
-          </div>
+        <Link to="/" className="flex items-center group">
           <span className="font-display font-extrabold text-xl tracking-tighter text-white">
             ocean <span className="font-light opacity-85 text-white/95">tv</span>
           </span>

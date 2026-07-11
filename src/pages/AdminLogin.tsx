@@ -125,10 +125,7 @@ export default function AdminLogin() {
         
         {/* Brand/Logo */}
         <div className="flex flex-col items-center gap-2">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-blue-600 to-cyan-400 text-white flex items-center justify-center shadow-xl shadow-blue-500/10">
-            <Waves className="w-7 h-7" />
-          </div>
-          <div className="mt-2">
+          <div className="mt-1">
             <h2 className="font-display font-extrabold text-2xl text-white tracking-tighter">
               ocean <span className="font-light opacity-85 text-white/95">tv</span>
             </h2>
