@@ -146,7 +146,7 @@ export default function Home() {
       {heroMovies.length > 0 && <HeroCarousel movies={heroMovies} />}
 
       {/* Dynamic Scrolling Sections */}
-      <div className="relative z-10 -mt-16 sm:-mt-24 md:-mt-28 flex flex-col gap-4">
+      <div className="relative z-10 -mt-4 sm:-mt-8 md:-mt-10 flex flex-col gap-4">
         {sections.map((section) => {
           const items = resolveSectionItems(section);
           if (items.length === 0) return null;

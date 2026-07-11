@@ -135,6 +135,8 @@ export default function Admin() {
   const [newSectionListType, setNewSectionListType] = useState<HomeSection['listType']>('trending');
   const [newSectionVal, setNewSectionVal] = useState('');
   const [newSectionSortBy, setNewSectionSortBy] = useState<HomeSection['sortBy']>('none');
+  const [customSearchQuery, setCustomSearchQuery] = useState('');
+  const [showCustomDropdown, setShowCustomDropdown] = useState(false);
 
   // --- STATE FOR TMDB AUTOCOMPLETE SEARCH ---
   const [movieSearchQuery, setMovieSearchQuery] = useState('');
@@ -678,6 +680,33 @@ export default function Admin() {
   ];
   const uniqueDbLanguages = Array.from(new Set(dbLanguages)).sort();
   const availableLanguages = uniqueDbLanguages.length > 0 ? uniqueDbLanguages : ['English', 'Korean', 'Japanese', 'Thai', 'Chinese', 'Spanish'];
+
+  const dbGenres = [
+    ...movies.flatMap(m => m.genres || []),
+    ...series.flatMap(s => s.genres || [])
+  ];
+  const uniqueDbGenres = Array.from(new Set(dbGenres)).sort();
+  const availableGenres = uniqueDbGenres.length > 0 ? uniqueDbGenres : ['Action', 'Comedy', 'Drama', 'Thriller', 'Sci-Fi', 'Romance', 'Horror', 'Mystery'];
+
+  const getCustomSuggestions = () => {
+    if (!customSearchQuery.trim()) return [];
+    
+    let candidates: (Movie | Series)[] = [];
+    if (newSectionType === 'movies') {
+      candidates = movies;
+    } else if (newSectionType === 'series') {
+      candidates = series;
+    } else {
+      candidates = [...movies, ...series];
+    }
+
+    const query = customSearchQuery.toLowerCase().trim();
+    return candidates.filter(item => 
+      item.title.toLowerCase().includes(query) ||
+      (item.originalTitle && item.originalTitle.toLowerCase().includes(query)) ||
+      item.id.toLowerCase().includes(query)
+    ).slice(0, 8);
+  };
 
   return (
     <div className="w-full bg-apple-gray-900 min-h-screen pt-28 pb-20 px-6 md:px-12">
@@ -1889,6 +1918,14 @@ export default function Admin() {
                           ];
                           const uniqueLangs = Array.from(new Set(dbLangs)).sort();
                           setNewSectionVal(uniqueLangs[0] || 'English');
+                        } else if (val === 'genre') {
+                          // set default genre value from computed db list if available
+                          const dbGens = [
+                            ...movies.flatMap(m => m.genres || []),
+                            ...series.flatMap(s => s.genres || [])
+                          ];
+                          const uniqueGens = Array.from(new Set(dbGens)).sort();
+                          setNewSectionVal(uniqueGens[0] || 'Action');
                         } else {
                           setNewSectionVal('');
                         }
@@ -1909,7 +1946,7 @@ export default function Admin() {
                   {(newSectionListType === 'genre' || newSectionListType === 'language' || newSectionListType === 'custom') && (
                     <div className="flex flex-col gap-1">
                       <label className="text-[9px] font-black text-white/40 uppercase">
-                        {newSectionListType === 'genre' ? 'Genre name' : newSectionListType === 'language' ? 'Choose Language' : 'Comma-separated IDs'}
+                        {newSectionListType === 'genre' ? 'Choose Genre' : newSectionListType === 'language' ? 'Choose Language' : 'Comma-separated IDs'}
                       </label>
                       {newSectionListType === 'language' ? (
                         <select
@@ -1923,15 +1960,148 @@ export default function Admin() {
                             <option key={lang} value={lang}>{lang}</option>
                           ))}
                         </select>
-                      ) : (
-                        <input
-                          type="text"
+                      ) : newSectionListType === 'genre' ? (
+                        <select
                           value={newSectionVal}
                           onChange={(e) => setNewSectionVal(e.target.value)}
-                          placeholder={newSectionListType === 'genre' ? 'e.g. Sci-Fi' : 'e.g. dune-2, inter-1'}
                           className="bg-apple-gray-800 text-white border border-white/10 rounded-lg p-2.5 text-xs font-semibold outline-none"
                           required
-                        />
+                        >
+                          <option value="" disabled>-- Select Genre --</option>
+                          {availableGenres.map((gen) => (
+                            <option key={gen} value={gen}>{gen}</option>
+                          ))}
+                        </select>
+                      ) : (
+                        <div className="relative flex flex-col gap-1.5">
+                          {/* Autocomplete Search Input */}
+                          <div className="relative">
+                            <input
+                              type="text"
+                              value={customSearchQuery}
+                              onChange={(e) => {
+                                setCustomSearchQuery(e.target.value);
+                                setShowCustomDropdown(true);
+                              }}
+                              onFocus={() => setShowCustomDropdown(true)}
+                              onBlur={() => setTimeout(() => setShowCustomDropdown(false), 200)}
+                              placeholder="Type movie/show name to search & add..."
+                              className="w-full bg-apple-gray-800 text-white border border-white/10 rounded-lg p-2.5 text-xs font-semibold outline-none pr-14"
+                            />
+                            {customSearchQuery && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setCustomSearchQuery('');
+                                  setShowCustomDropdown(false);
+                                }}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white text-xs font-bold font-sans"
+                              >
+                                Clear
+                              </button>
+                            )}
+                          </div>
+
+                          {/* Dropdown list of matching suggestions from local database */}
+                          {showCustomDropdown && getCustomSuggestions().length > 0 && (
+                            <div className="absolute left-0 right-0 top-[38px] bg-apple-gray-800 border border-white/10 rounded-lg shadow-2xl max-h-52 overflow-y-auto z-50 py-1">
+                              {getCustomSuggestions().map((item) => {
+                                const isMovie = 'runtime' in item;
+                                const selectedIds = newSectionVal ? newSectionVal.split(',').map(id => id.trim()).filter(Boolean) : [];
+                                const isAlreadySelected = selectedIds.includes(item.id);
+
+                                return (
+                                  <button
+                                    key={item.id}
+                                    type="button"
+                                    onClick={() => {
+                                      if (!isAlreadySelected) {
+                                        const newIds = [...selectedIds, item.id];
+                                        setNewSectionVal(newIds.join(', '));
+                                      }
+                                      setCustomSearchQuery('');
+                                      setShowCustomDropdown(false);
+                                    }}
+                                    className={`w-full text-left px-3 py-2 text-xs border-b border-white/5 flex items-center justify-between transition-colors ${
+                                      isAlreadySelected ? 'bg-white/5 text-white/40 cursor-not-allowed' : 'hover:bg-white/10 text-white'
+                                    }`}
+                                  >
+                                    <div className="flex items-center gap-2">
+                                      {item.posterPath ? (
+                                        <img
+                                          src={item.posterPath}
+                                          alt={item.title}
+                                          referrerPolicy="no-referrer"
+                                          className="w-6 h-8 object-cover rounded bg-white/10"
+                                        />
+                                      ) : (
+                                        <div className="w-6 h-8 bg-white/10 rounded flex items-center justify-center text-[8px] text-white/50">
+                                          No Art
+                                        </div>
+                                      )}
+                                      <div className="text-left">
+                                        <div className="font-bold text-white leading-tight">{item.title}</div>
+                                        <div className="text-[10px] text-white/40 mt-0.5">
+                                          {isMovie ? 'Movie' : 'TV Show'} • {item.releaseYear || 'N/A'} • Rating: {item.rating || 'N/A'}
+                                        </div>
+                                      </div>
+                                    </div>
+                                    {isAlreadySelected ? (
+                                      <span className="text-[8px] font-black uppercase text-amber-500 bg-amber-500/10 px-1.5 py-0.5 rounded tracking-wider">Added</span>
+                                    ) : (
+                                      <span className="text-[8px] font-black uppercase text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded tracking-wider">Add</span>
+                                    )}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          )}
+
+                          {/* Editable plain-text input (for fallback/review/manual editing) */}
+                          <div className="mt-1 flex flex-col gap-1">
+                            <label className="text-[8px] font-black text-white/30 uppercase tracking-wider">Selected IDs (Edit manually if needed)</label>
+                            <input
+                              type="text"
+                              value={newSectionVal}
+                              onChange={(e) => setNewSectionVal(e.target.value)}
+                              placeholder="e.g. dune-2, inter-1"
+                              className="bg-apple-gray-800 text-white border border-white/10 rounded-lg p-2.5 text-xs font-semibold outline-none text-white/70"
+                              required
+                            />
+                          </div>
+
+                          {/* visual badges of selected items with clear button */}
+                          {newSectionVal && (
+                            <div className="flex flex-wrap gap-1.5 mt-1.5 max-h-40 overflow-y-auto p-2 bg-black/20 rounded-lg border border-white/5">
+                              {newSectionVal.split(',').map(id => id.trim()).filter(Boolean).map(id => {
+                                const matchedItem = [...movies, ...series].find(item => item.id === id);
+                                const displayName = matchedItem ? matchedItem.title : id;
+                                const isMovie = matchedItem ? ('runtime' in matchedItem) : false;
+                                return (
+                                  <span
+                                    key={id}
+                                    className="inline-flex items-center gap-1 px-2 py-1 bg-white/5 border border-white/10 rounded-full text-[11px] font-semibold text-white/95"
+                                  >
+                                    <span className="text-[8px] text-white/40 uppercase font-black tracking-wide mr-0.5">
+                                      {isMovie ? 'Movie' : matchedItem ? 'Show' : 'Raw ID'}
+                                    </span>
+                                    <span className="max-w-[120px] truncate">{displayName}</span>
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        const newIds = newSectionVal.split(',').map(x => x.trim()).filter(Boolean).filter(x => x !== id);
+                                        setNewSectionVal(newIds.join(', '));
+                                      }}
+                                      className="text-white/40 hover:text-red-500 ml-1 font-bold text-sm leading-none focus:outline-none transition-colors"
+                                    >
+                                      &times;
+                                    </button>
+                                  </span>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
                       )}
                     </div>
                   )}

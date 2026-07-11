@@ -130,7 +130,7 @@ export default function AdminLogin() {
           </div>
           <div className="mt-2">
             <h2 className="font-display font-extrabold text-2xl text-white tracking-tighter">
-              ocean<span className="font-light opacity-85 text-white/95">tv</span><span className="font-light text-cyan-400/90 ml-0.5">+</span>
+              ocean <span className="font-light opacity-85 text-white/95">tv</span>
             </h2>
             <p className="text-[10px] font-black text-cyan-400 uppercase tracking-widest mt-1">
               Secure Admin Gateway

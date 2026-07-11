@@ -63,7 +63,7 @@ export default function Navigation() {
             <Waves className="w-4.5 h-4.5" />
           </div>
           <span className="font-display font-extrabold text-xl tracking-tighter text-white">
-            ocean<span className="font-light opacity-85 text-white/95">tv</span><span className="font-light text-cyan-400/90 ml-0.5">+</span>
+            ocean <span className="font-light opacity-85 text-white/95">tv</span>
           </span>
         </Link>
 
